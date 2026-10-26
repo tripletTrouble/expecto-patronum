@@ -149,8 +149,8 @@ ADMIN_PASSWORD=""
 
 Estimates assume one developer working roughly full-time. Double them for part-time work.
 
-- [ ] **M0: Setup** (1-2 days): repo, Nuxt, database, deploy pipeline, seeded admin
-- [ ] **M1: Auth and approval** (3-4 days): register and login, roles, teacher approval
+- [ ] **M0: Setup** (1-2 days): repo, Nuxt, database, deploy pipeline
+- [ ] **M1: Auth and approval** (3-4 days): seeded admin, register and login, roles, teacher approval
 - [ ] **M2: Question bank** (5-6 days): categories and all three question types
 - [ ] **M3: Exam builder** (3-4 days): create, configure and publish exams; share link and code
 - [ ] **M4: Taking an exam** (6-8 days): student and guest flow, timer, autosave, submit, grading
