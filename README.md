@@ -1,8 +1,8 @@
-# Expectro Pratronum - Exam App for Indonesian students
+# Expecto Patronum - Exam App for Indonesian Students
 
 An online exam application for Indonesian students. Teachers build a question bank and compose exams from it; students, with or without an account, take the exams and get graded automatically.
 
-> **Status:** planning complete, implementation not started.
+> **Status:** Nuxt project scaffolded; application features are being implemented incrementally.
 
 ---
 
@@ -89,43 +89,44 @@ Free tiers are fine for development and small classes. For large exams with many
 
 ## Project Structure
 
+The current repository contains the Nuxt application scaffold. The following structure describes the planned application areas as they are implemented:
+
 ```
-app/
-  pages/
-    login.vue, register.vue
-    exam/[code].vue              # students and guests take an exam
-    teacher/                     # questions, exams, results
-    admin/teachers.vue           # teacher approval
-  components/
-    question/                    # editor and player per question type
-  middleware/
-server/
-  api/                           # auth, admin, teacher, exams, attempts
-  utils/                         # shared server helpers
-prisma/
-  schema.prisma
-  seed.ts                        # creates the admin account
-.env.example
-README.md
+app/                         # Nuxt application pages and components
+server/                      # Nitro server routes and shared server utilities
+public/                      # static assets
+.env.example                 # local environment variable template
+README.md                    # project documentation
+```
+
+Planned areas include:
+
+```
+app/pages/                   # login, registration, exam, teacher and admin pages
+app/components/question/     # question editors and exam players
+app/middleware/              # client-side UX guards
+server/api/                  # auth, admin, teacher, exam and attempt endpoints
+server/utils/                # shared server helpers
+prisma/                      # schema, migrations and seed script
 ```
 
 ---
 
 ## Getting Started
 
-> The repo is not scaffolded yet. These are the intended steps.
+These steps run the current Nuxt scaffold created in issue #1. Database and Prisma setup will be added in later issues.
 
-**Prerequisites:** [Bun](https://bun.sh), Node.js (current LTS, still used by some tooling such as the Prisma CLI), a PostgreSQL database.
+**Prerequisites:** [Bun](https://bun.sh).
 
 ```bash
 bun install
 cp .env.example .env
-bunx prisma migrate dev
-bunx prisma db seed
 bun run dev
 ```
 
 ### Environment variables
+
+The scaffold does not consume these variables yet; they are reserved for the database and authentication work planned in later issues.
 
 ```env
 DATABASE_URL=""              # Postgres connection string
@@ -138,10 +139,7 @@ ADMIN_PASSWORD=""
 
 ## Deployment
 
-1. Create a Postgres database (Supabase or Neon), ideally in the Singapore region.
-2. Import the repo in Vercel and set the environment variables above.
-3. Set the function region to Singapore (`sin1`).
-4. Run `bunx prisma migrate deploy` against the production database and seed the admin once.
+Deployment will be documented after the database, authentication and application features are implemented.
 
 ---
 

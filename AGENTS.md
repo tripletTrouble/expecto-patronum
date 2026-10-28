@@ -128,7 +128,7 @@ bunx prisma migrate dev      # create/apply a migration locally
 bunx prisma db seed          # seed the admin account
 ```
 
-The repo is not scaffolded yet, so **read `package.json` for the real scripts** (build, typecheck, lint, test) once it exists. If a script is missing, say so. Do not invent it.
+The Nuxt scaffold currently provides `dev`, `build`, `generate`, `preview` and `postinstall` scripts. Read `package.json` for the real scripts before running commands; if a script is missing, say so. Do not invent it. Prisma commands apply only after the database issues add Prisma to the project.
 
 ---
 
