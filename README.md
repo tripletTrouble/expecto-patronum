@@ -149,6 +149,19 @@ ADMIN_PASSWORD=""
 
 Issue #4 uses **Supabase** with two separate PostgreSQL projects: one for development and one for production. Both projects should be created in the Singapore region (`ap-southeast-1`) or the Supabase APAC Southeast Asia (Singapore) region.
 
+### Health check
+
+A public health check endpoint is available for deployments and monitoring:
+
+```bash
+curl -i http://localhost:3000/api/health
+```
+
+- When the database is reachable, it returns HTTP `200` with `{ "status": "ok" }`.
+- When the database is unreachable or the query fails, it returns HTTP `503` with `{ "status": "error" }`.
+- The response includes `Cache-Control: no-store` and contains no database details or error messages. Failure details are logged on the server only.
+- Only `GET` is accepted.
+
 Supabase's current connection guidance uses:
 
 - `DATABASE_URL`: the shared pooler **transaction-mode** connection (port `6543`) for the running Nuxt serverless application. Transaction mode is intended for serverless functions with many short-lived connections.
