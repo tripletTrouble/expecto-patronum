@@ -133,6 +133,10 @@ bun run lint
 
 Type checking uses Nuxt's `typecheck` command. Linting and formatting use Nuxt's `@nuxt/eslint` module with ESLint Stylistic as the repository's single formatting tool.
 
+### Continuous Integration
+
+GitHub Actions runs CI on pull requests and pushes to `main`. The workflow (`.github/workflows/ci.yml`) installs dependencies with `bun install --frozen-lockfile`, generates the Prisma client (`bunx prisma generate`), and runs in order: `bun run typecheck`, `bun run lint`, `bun run build`. All third-party actions are pinned to commit SHAs and the workflow uses read-only permissions with placeholder environment values only.
+
 ### Environment variables
 
 The application uses a Supabase PostgreSQL project for each environment. Keep the development values in your local `.env` only. Keep production values in the password manager until issue #8 adds them to Vercel. Never use the production database from a local development environment.
