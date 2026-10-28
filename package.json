@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.17.0",
+    "@types/node": "^26.6.5",
     "prisma": "6",
     "typescript": "^5.8.3",
     "vue-tsc": "^3.3.13"
