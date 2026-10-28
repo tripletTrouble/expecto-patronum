@@ -114,7 +114,7 @@ prisma/                      # schema, migrations and seed script
 
 ## Getting Started
 
-These steps run the current Nuxt scaffold created in issue #1. Database and Prisma setup will be added in later issues.
+These steps run the current Nuxt scaffold created in issue #1. Prisma setup is covered by issue #5.
 
 **Prerequisites:** [Bun](https://bun.sh).
 
@@ -126,14 +126,36 @@ bun run dev
 
 ### Environment variables
 
-The scaffold does not consume these variables yet; they are reserved for the database and authentication work planned in later issues.
+The application uses a Supabase PostgreSQL project for each environment. Keep the development values in your local `.env` only. Keep production values in the password manager until issue #8 adds them to Vercel. Never use the production database from a local development environment.
 
 ```env
-DATABASE_URL=""              # Postgres connection string
+DATABASE_URL=""              # Supabase pooled transaction-mode URL for the running app
+DIRECT_URL=""                # Supabase direct database URL for Prisma migrations
 NUXT_SESSION_PASSWORD=""     # at least 32 random characters
 ADMIN_EMAIL=""               # seeded administrator
 ADMIN_PASSWORD=""
 ```
+
+### Database setup
+
+Issue #4 uses **Supabase** with two separate PostgreSQL projects: one for development and one for production. Both projects should be created in the Singapore region (`ap-southeast-1`) or the Supabase APAC Southeast Asia (Singapore) region.
+
+Supabase's current connection guidance uses:
+
+- `DATABASE_URL`: the shared pooler **transaction-mode** connection (port `6543`) for the running Nuxt serverless application. Transaction mode is intended for serverless functions with many short-lived connections.
+- `DIRECT_URL`: the direct PostgreSQL connection for Prisma migrations, `pg_dump`, backup and restore, and other native PostgreSQL commands. If the local network is IPv4-only and cannot use a direct connection, use Supabase's shared pooler **session-mode** connection (port `5432`) for migration tooling instead and document that exception.
+
+Test the development and production connections separately with `psql` or a GUI client, but do not put either password or connection string in this README, an issue, a PR, or chat. Production credentials belong in the password manager until issue #8 provisions Vercel.
+
+The current Supabase Free plan notes relevant to this project are:
+
+- Up to two active projects, which is sufficient for the separate development and production projects.
+- 500 MB database size and 5 GB egress per project.
+- Free projects may be paused after roughly one week of low activity and can be resumed from the dashboard.
+- Connection capacity depends on the project's compute size; use the pooler for the application and monitor connection usage in Supabase rather than opening many direct connections.
+- Downloadable managed database backups are not available on the Free plan. Use regular `supabase db dump` or `pg_dump` exports and keep them off-site if a logical backup is needed. Paid plans provide daily backups (7 days on Pro, 14 days on Team); PITR is a paid add-on.
+
+Sources checked: [Supabase PostgreSQL connections](https://supabase.com/docs/guides/database/connecting-to-postgres), [Supabase regions](https://supabase.com/docs/guides/platform/regions), [project pausing](https://supabase.com/docs/guides/platform/pausing-projects), [database backups](https://supabase.com/docs/guides/platform/backups), and [pricing and limits](https://supabase.com/pricing).
 
 ---
 
