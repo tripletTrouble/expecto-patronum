@@ -196,7 +196,22 @@ bunx prisma studio           # browse data
 
 ## Deployment
 
-Deployment will be documented after the database, authentication and application features are implemented.
+### Vercel (production)
+
+1. Import the repository into [Vercel](https://vercel.com). Use the Nuxt framework preset. With Bun, use `bun install` as the install command and `bun run build` as the build command (confirmed against current Vercel/Nuxt docs).
+2. Set the Serverless/Functions region to **Singapore (`sin1`)** in Project Settings → Functions.
+3. In Project Settings → Environment Variables, add the following **to Production only** (do not expose to Preview):
+   - `DATABASE_URL` — Supabase pooled transaction-mode URL for production
+   - `DIRECT_URL` — Supabase direct URL for running migrations
+   - `NUXT_SESSION_PASSWORD` — at least 32 random characters, generated fresh for production (different from development)
+   - `ADMIN_EMAIL`
+   - `ADMIN_PASSWORD`
+4. Apply migrations from your machine (do **not** run migrations automatically on every build):
+   ```bash
+   DIRECT_URL="..." bunx prisma migrate deploy
+   ```
+5. Deploy from `main`. Vercel will auto-deploy on subsequent merges to `main` with no manual steps.
+6. Verify: `GET https://<production-url>/api/health` should return `200` with `{ "status": "ok" }`. Failure returns `503` with `{ "status": "error" }` and logs details server-side only.
 
 ---
 
