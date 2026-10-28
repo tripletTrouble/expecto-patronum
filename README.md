@@ -168,6 +168,15 @@ Sources checked: [Supabase PostgreSQL connections](https://supabase.com/docs/gui
 
 ---
 
+
+### Prisma commands
+
+```bash
+bunx prisma migrate dev      # create/apply migrations in dev
+bunx prisma generate         # generate Prisma Client
+bunx prisma studio           # browse data
+```
+
 ## Deployment
 
 Deployment will be documented after the database, authentication and application features are implemented.
