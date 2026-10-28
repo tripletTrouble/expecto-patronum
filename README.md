@@ -124,6 +124,15 @@ cp .env.example .env
 bun run dev
 ```
 
+### Quality checks
+
+```bash
+bun run typecheck
+bun run lint
+```
+
+Type checking uses Nuxt's `typecheck` command. Linting and formatting use Nuxt's `@nuxt/eslint` module with ESLint Stylistic as the repository's single formatting tool.
+
 ### Environment variables
 
 The scaffold does not consume these variables yet; they are reserved for the database and authentication work planned in later issues.

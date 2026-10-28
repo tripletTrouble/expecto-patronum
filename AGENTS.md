@@ -124,6 +124,8 @@ Use **Bun**. Do not use npm, yarn or pnpm, and do not commit their lockfiles.
 ```bash
 bun install                  # install dependencies
 bun run dev                  # start the dev server
+bun run typecheck            # check TypeScript and Vue types
+bun run lint                 # check code style with ESLint
 bunx prisma migrate dev      # create/apply a migration locally
 bunx prisma db seed          # seed the admin account
 ```
