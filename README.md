@@ -267,8 +267,8 @@ Estimates assume one developer working roughly full-time. Double them for part-t
 
 - Should students see the correct answers after an exam, or only their score?
 - How many students are expected to take the same exam at the same time?
-- UI language: Bahasa Indonesia, English, or both?
 
 ### Decided
 
 - Stack: Nuxt (Vue) with PostgreSQL and Prisma.
+- UI language: Indonesian for all user-facing application text.
