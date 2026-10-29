@@ -101,7 +101,8 @@ These must hold in every change that touches exams. A change that breaks one is 
 - **Comments explain why, not what.** Do not add comments that restate the code. Do not leave commented-out code.
 - **Error handling:** handle expected failures explicitly and return correct HTTP status codes (400 validation, 401 unauthenticated, 403 forbidden, 404 not found, 409 conflict). Do not swallow errors silently.
 - **No `console.log` debugging left behind.**
-- **UI text:** keep user-facing strings easy to find and change, since the UI language is still undecided.
+- **UI language:** user-facing application text is in Indonesian. Code, identifiers, comments, commit messages and repository documentation remain in English.
+- **UI strings:** keep page- and component-specific strings close to the code that renders them, grouped in clearly named constants when there are several related strings. Put strings shared by multiple pages or components in a dedicated module under `app/` (for example, `app/constants/ui-text.ts`) once shared strings exist. Do not add an i18n library for this convention.
 - **Accessibility and mobile:** most students use phones. Forms and exam screens must work on small touch screens and be keyboard accessible.
 
 ---
