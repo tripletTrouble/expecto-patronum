@@ -126,11 +126,12 @@ bun install                  # install dependencies
 bun run dev                  # start the dev server
 bun run typecheck            # check TypeScript and Vue types
 bun run lint                 # check code style with ESLint
+bun run test                 # run the test suite
 bunx prisma migrate dev      # create/apply a migration locally
 bunx prisma db seed          # seed the admin account
 ```
 
-The Nuxt scaffold currently provides `dev`, `build`, `generate`, `preview` and `postinstall` scripts. Read `package.json` for the real scripts before running commands; if a script is missing, say so. Do not invent it. Prisma commands apply only after the database issues add Prisma to the project.
+The Nuxt scaffold provides `dev`, `build`, `generate`, `preview`, `test` and `postinstall` scripts. Read `package.json` for the real scripts before running commands; if a script is missing, say so. Do not invent it. Prisma commands apply only after the database issues add Prisma to the project.
 
 ---
 
