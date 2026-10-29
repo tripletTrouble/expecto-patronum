@@ -129,13 +129,30 @@ bun run dev
 ```bash
 bun run typecheck
 bun run lint
+bun run test
 ```
 
 Type checking uses Nuxt's `typecheck` command. Linting and formatting use Nuxt's `@nuxt/eslint` module with ESLint Stylistic as the repository's single formatting tool.
 
+### Testing
+
+Tests use Vitest. The recommended test directories are:
+
+- `test/unit/` for fast unit tests that do not need the Nuxt runtime.
+- `test/nuxt/` for tests that need the Nuxt runtime.
+- `test/e2e/` for end-to-end tests, which are not part of the current test suite.
+
+Run the test suite with:
+
+```bash
+bun run test
+```
+
+The current tests do not connect to Prisma or any database. Future database-backed tests must use a separate, isolated test database and must never use development or production database credentials. Test configuration must not fall back to `DATABASE_URL` or `DIRECT_URL` for database tests.
+
 ### Continuous Integration
 
-GitHub Actions runs CI on pull requests and pushes to `main`. The workflow (`.github/workflows/ci.yml`) installs dependencies with `bun install --frozen-lockfile`, generates the Prisma client (`bunx prisma generate`), and runs in order: `bun run typecheck`, `bun run lint`, `bun run build`. All third-party actions are pinned to commit SHAs and the workflow uses read-only permissions with placeholder environment values only.
+GitHub Actions runs CI on pull requests and pushes to `main`. The workflow (`.github/workflows/ci.yml`) installs dependencies with `bun install --frozen-lockfile`, generates the Prisma client (`bunx prisma generate`), and runs in order: `bun run typecheck`, `bun run lint`, `bun run test`, `bun run build`. All third-party actions are pinned to commit SHAs and the workflow uses read-only permissions with placeholder environment values only.
 
 ### Environment variables
 
