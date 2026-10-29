@@ -158,10 +158,12 @@ GitHub Actions runs CI on pull requests and pushes to `main`. The workflow (`.gi
 
 The application uses a Supabase PostgreSQL project for each environment. Keep the development values in your local `.env` only. Keep production values in the password manager until issue #8 adds them to Vercel. Never use the production database from a local development environment.
 
+Authentication uses `nuxt-auth-utils` with an encrypted session cookie. The application session contains only the authenticated user's database ID; roles, account status, email addresses and password hashes remain in the database and are not stored in the session. The module's session endpoint is `/api/_auth/session`.
+
 ```env
 DATABASE_URL=""              # Supabase pooled transaction-mode URL for the running app
 DIRECT_URL=""                # Supabase direct database URL for Prisma migrations
-NUXT_SESSION_PASSWORD=""     # at least 32 random characters
+NUXT_SESSION_PASSWORD=""     # random value of at least 32 characters; different per environment
 ADMIN_EMAIL=""               # seeded administrator
 ADMIN_PASSWORD=""
 ```
@@ -229,6 +231,8 @@ bunx prisma studio           # browse data
    ```
 5. Deploy from `main`. Vercel will auto-deploy on subsequent merges to `main` with no manual steps.
 6. Verify: `GET https://<production-url>/api/health` should return `200` with `{ "status": "ok" }`. Failure returns `503` with `{ "status": "error" }` and logs details server-side only.
+
+`nuxt-auth-utils` uses an encrypted, `HttpOnly` session cookie. Its default cookie configuration uses `SameSite=Lax`; production must be served over HTTPS so the cookie is secure in transit. The module's session password must never be committed or shared in documentation, issues or pull requests.
 
 ---
 
