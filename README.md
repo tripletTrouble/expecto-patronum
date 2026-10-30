@@ -245,6 +245,11 @@ hash. After confirming that the administrator can log in, remove
 administrator passwords different. Do not put either password in Git, the
 README, an issue, a pull request, or chat.
 
+The current repository does not yet contain the application login flow. The
+tests verify the real `nuxt-auth-utils` hash and verification helpers against
+each other; end-to-end verification through the application login remains a
+follow-up for the M1 login work.
+
 Nuxt exposes `hashPassword` only inside the Nitro server runtime, while Prisma
 seed scripts run as standalone programs. The bootstrap uses an experimental
 Nitro task so it runs inside the same Nuxt server runtime and uses the same

@@ -50,7 +50,7 @@ describe('bootstrapAdmin', () => {
     expect(hashPassword).not.toHaveBeenCalled()
   })
 
-  it('creates an approved admin with a hashed password', async () => {
+  it('stores the hash returned by the server password helper', async () => {
     findFirst.mockResolvedValue(null)
 
     await expect(bootstrapAdmin()).resolves.toEqual({ created: true })
