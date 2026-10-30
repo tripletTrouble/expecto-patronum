@@ -35,6 +35,25 @@ const nameError = computed(() => {
   return undefined
 })
 
+const emailError = computed(() => {
+  if (!form.email) {
+    return undefined
+  }
+
+  const email = form.email.trim()
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+
+  if (!isValidEmail) {
+    return 'Email tidak valid.'
+  }
+
+  if (email.length > 320) {
+    return 'Email terlalu panjang.'
+  }
+
+  return undefined
+})
+
 const passwordError = computed(() => {
   if (!form.password || form.password.length >= 8) {
     return undefined
@@ -54,8 +73,8 @@ const passwordConfirmationError = computed(() => {
 async function submitRegistration() {
   errorMessage.value = ''
 
-  if (nameError.value || passwordError.value || passwordConfirmationError.value) {
-    errorMessage.value = nameError.value ?? passwordError.value ?? passwordConfirmationError.value ?? ''
+  if (nameError.value || emailError.value || passwordError.value || passwordConfirmationError.value) {
+    errorMessage.value = nameError.value ?? emailError.value ?? passwordError.value ?? passwordConfirmationError.value ?? ''
     return
   }
 
@@ -160,6 +179,12 @@ async function submitRegistration() {
             required
             class="w-full"
           />
+          <p
+            class="min-h-4 text-xs leading-4 text-error"
+            aria-live="polite"
+          >
+            {{ emailError ?? ' ' }}
+          </p>
         </UFormField>
 
         <UFormField
