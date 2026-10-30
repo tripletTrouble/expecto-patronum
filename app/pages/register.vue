@@ -181,6 +181,14 @@ async function submitRegistration() {
           {{ isSubmitting ? 'Mendaftarkan...' : 'Daftar' }}
         </button>
       </form>
+
+      <p class="mt-6 text-center text-sm text-gray-600">
+        Sudah punya akun?
+        <NuxtLink
+          to="/login"
+          class="font-medium text-primary hover:underline"
+        >Masuk</NuxtLink>
+      </p>
     </section>
   </main>
 </template>
