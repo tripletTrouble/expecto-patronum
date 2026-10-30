@@ -56,199 +56,205 @@ async function submitRegistration() {
 </script>
 
 <template>
-  <main class="min-h-screen bg-gray-50 px-4 py-10 sm:py-16">
-    <section class="mx-auto w-full max-w-md rounded-xl bg-white p-6 shadow-sm sm:p-8">
-      <div
-        v-if="teacherRegistrationComplete"
-        class="text-center"
+  <AuthShell>
+    <div
+      v-if="teacherRegistrationComplete"
+      class="text-center"
+    >
+      <h1 class="text-2xl font-bold text-gray-900">
+        Pendaftaran guru berhasil
+      </h1>
+      <p class="mt-3 text-sm leading-6 text-gray-600">
+        Akunmu sedang menunggu persetujuan administrator. Setelah disetujui, kamu dapat masuk dan menggunakan fitur guru.
+      </p>
+      <UButton
+        to="/login"
+        variant="link"
+        class="mt-6"
       >
+        Kembali ke halaman masuk
+      </UButton>
+    </div>
+
+    <template v-else>
+      <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900">
-          Pendaftaran guru berhasil
+          Buat akun
         </h1>
-        <p class="mt-3 text-sm leading-6 text-gray-600">
-          Akunmu sedang menunggu persetujuan administrator. Setelah disetujui, kamu dapat masuk dan menggunakan fitur guru.
+        <p class="mt-2 text-sm text-gray-600">
+          Pilih jenis akun yang ingin kamu daftarkan.
         </p>
-        <NuxtLink
-          to="/login"
-          class="mt-6 inline-block font-medium text-primary hover:underline"
-        >Kembali ke halaman masuk</NuxtLink>
       </div>
 
-      <template v-else>
-        <div class="mb-6">
-          <h1 class="text-2xl font-bold text-gray-900">
-            Buat akun
-          </h1>
-          <p class="mt-2 text-sm text-gray-600">
-            Pilih jenis akun yang ingin kamu daftarkan.
-          </p>
-        </div>
-
-        <div
-          class="mb-6 grid grid-cols-2 rounded-lg bg-gray-100 p-1"
-          role="tablist"
-          aria-label="Jenis akun"
+      <UButtonGroup
+        class="mb-6 grid grid-cols-2 rounded-lg bg-gray-100 p-1"
+        role="tablist"
+        aria-label="Jenis akun"
+      >
+        <UButton
+          type="button"
+          role="tab"
+          :aria-selected="registrationType === 'student'"
+          :color="registrationType === 'student' ? 'primary' : 'neutral'"
+          :variant="registrationType === 'student' ? 'solid' : 'ghost'"
+          @click="registrationType = 'student'"
         >
-          <button
-            type="button"
-            role="tab"
-            :aria-selected="registrationType === 'student'"
-            :class="registrationType === 'student' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'"
-            class="rounded-md px-3 py-2 text-sm font-medium"
-            @click="registrationType = 'student'"
+          Daftar sebagai siswa
+        </UButton>
+        <UButton
+          type="button"
+          role="tab"
+          :aria-selected="registrationType === 'teacher'"
+          :color="registrationType === 'teacher' ? 'primary' : 'neutral'"
+          :variant="registrationType === 'teacher' ? 'solid' : 'ghost'"
+          @click="registrationType = 'teacher'"
+        >
+          Daftar sebagai guru
+        </UButton>
+      </UButtonGroup>
+
+      <UAlert
+        v-if="registrationType === 'teacher'"
+        color="info"
+        variant="soft"
+        description="Akun guru perlu disetujui oleh administrator sebelum dapat digunakan untuk masuk dan mengakses fitur guru."
+        role="alert"
+        class="mb-6"
+      />
+
+      <UForm
+        :state="form"
+        class="space-y-5"
+        @submit.prevent="submitRegistration"
+      >
+        <UFormField
+          label="Nama"
+          name="name"
+          required
+          :ui="{ label: 'text-gray-700', description: 'text-gray-600' }"
+        >
+          <UInput
+            v-model="form.name"
+            name="name"
+            type="text"
+            autocomplete="name"
+            required
+            variant="outline"
+            class="w-full"
+            :ui="{ base: 'bg-white ring-1 ring-gray-300 focus-visible:ring-2 focus-visible:ring-primary' }"
+          />
+        </UFormField>
+
+        <UFormField
+          label="Email"
+          name="email"
+          required
+          :ui="{ label: 'text-gray-700', description: 'text-gray-600' }"
+        >
+          <UInput
+            v-model="form.email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            required
+            variant="outline"
+            class="w-full"
+            :ui="{ base: 'bg-white ring-1 ring-gray-300 focus-visible:ring-2 focus-visible:ring-primary' }"
+          />
+        </UFormField>
+
+        <UFormField
+          label="Kata sandi"
+          name="password"
+          description="Minimal 8 karakter."
+          required
+          :ui="{ label: 'text-gray-700', description: 'text-gray-600' }"
+        >
+          <UInput
+            v-model="form.password"
+            name="password"
+            :type="showPassword ? 'text' : 'password'"
+            autocomplete="new-password"
+            minlength="8"
+            maxlength="128"
+            required
+            variant="outline"
+            class="w-full"
+            :ui="{ base: 'bg-white ring-1 ring-gray-300 focus-visible:ring-2 focus-visible:ring-primary' }"
           >
-            Daftar sebagai siswa
-          </button>
-          <button
-            type="button"
-            role="tab"
-            :aria-selected="registrationType === 'teacher'"
-            :class="registrationType === 'teacher' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'"
-            class="rounded-md px-3 py-2 text-sm font-medium"
-            @click="registrationType = 'teacher'"
-          >
-            Daftar sebagai guru
-          </button>
-        </div>
-
-        <div
-          v-if="registrationType === 'teacher'"
-          role="alert"
-          class="mb-6 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm leading-5 text-blue-800"
-        >
-          Akun guru perlu disetujui oleh administrator sebelum dapat digunakan untuk masuk dan mengakses fitur guru.
-        </div>
-
-        <form
-          class="space-y-5"
-          @submit.prevent="submitRegistration"
-        >
-          <div>
-            <label
-              for="name"
-              class="mb-1 block text-sm font-medium text-gray-700"
-            >Nama</label>
-            <input
-              id="name"
-              v-model="form.name"
-              name="name"
-              type="text"
-              autocomplete="name"
-              required
-              class="w-full rounded-md border border-gray-300 px-3 py-2 text-base text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            >
-          </div>
-
-          <div>
-            <label
-              for="email"
-              class="mb-1 block text-sm font-medium text-gray-700"
-            >Email</label>
-            <input
-              id="email"
-              v-model="form.email"
-              name="email"
-              type="email"
-              autocomplete="email"
-              required
-              class="w-full rounded-md border border-gray-300 px-3 py-2 text-base text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            >
-          </div>
-
-          <div>
-            <label
-              for="password"
-              class="mb-1 block text-sm font-medium text-gray-700"
-            >Kata sandi</label>
-            <div class="relative">
-              <input
-                id="password"
-                v-model="form.password"
-                name="password"
-                :type="showPassword ? 'text' : 'password'"
-                autocomplete="new-password"
-                minlength="8"
-                maxlength="128"
-                required
-                class="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 text-base text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-              >
-              <button
-                type="button"
+            <template #trailing>
+              <UButton
+                color="neutral"
+                variant="link"
+                size="sm"
                 :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
                 :aria-pressed="showPassword"
-                class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700"
+                :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
                 @click="showPassword = !showPassword"
-              >
-                <UIcon
-                  :name="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-                  class="h-5 w-5"
-                  aria-hidden="true"
-                />
-              </button>
-            </div>
-            <p class="mt-1 text-xs text-gray-500">
-              Minimal 8 karakter.
-            </p>
-          </div>
+              />
+            </template>
+          </UInput>
+        </UFormField>
 
-          <div>
-            <label
-              for="passwordConfirmation"
-              class="mb-1 block text-sm font-medium text-gray-700"
-            >Konfirmasi kata sandi</label>
-            <div class="relative">
-              <input
-                id="passwordConfirmation"
-                v-model="form.passwordConfirmation"
-                name="passwordConfirmation"
-                :type="showPasswordConfirmation ? 'text' : 'password'"
-                autocomplete="new-password"
-                minlength="8"
-                maxlength="128"
-                required
-                class="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 text-base text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-              >
-              <button
-                type="button"
+        <UFormField
+          label="Konfirmasi kata sandi"
+          name="passwordConfirmation"
+          required
+          :ui="{ label: 'text-gray-700', description: 'text-gray-600' }"
+        >
+          <UInput
+            v-model="form.passwordConfirmation"
+            name="passwordConfirmation"
+            :type="showPasswordConfirmation ? 'text' : 'password'"
+            autocomplete="new-password"
+            minlength="8"
+            maxlength="128"
+            required
+            variant="outline"
+            class="w-full"
+            :ui="{ base: 'bg-white ring-1 ring-gray-300 focus-visible:ring-2 focus-visible:ring-primary' }"
+          >
+            <template #trailing>
+              <UButton
+                color="neutral"
+                variant="link"
+                size="sm"
                 :aria-label="showPasswordConfirmation ? 'Sembunyikan konfirmasi kata sandi' : 'Tampilkan konfirmasi kata sandi'"
                 :aria-pressed="showPasswordConfirmation"
-                class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700"
+                :icon="showPasswordConfirmation ? 'i-lucide-eye-off' : 'i-lucide-eye'"
                 @click="showPasswordConfirmation = !showPasswordConfirmation"
-              >
-                <UIcon
-                  :name="showPasswordConfirmation ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-                  class="h-5 w-5"
-                  aria-hidden="true"
-                />
-              </button>
-            </div>
-          </div>
+              />
+            </template>
+          </UInput>
+        </UFormField>
 
-          <p
-            v-if="errorMessage"
-            role="alert"
-            class="rounded-md bg-red-50 p-3 text-sm text-red-700"
-          >
-            {{ errorMessage }}
-          </p>
+        <UAlert
+          v-if="errorMessage"
+          color="error"
+          variant="soft"
+          :description="errorMessage"
+          role="alert"
+        />
 
-          <button
-            type="submit"
-            :disabled="isSubmitting"
-            class="w-full rounded-md bg-primary px-4 py-2.5 font-medium text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {{ isSubmitting ? 'Mendaftarkan...' : 'Daftar' }}
-          </button>
-        </form>
+        <UButton
+          type="submit"
+          :loading="isSubmitting"
+          block
+        >
+          {{ isSubmitting ? 'Mendaftarkan...' : 'Daftar' }}
+        </UButton>
+      </UForm>
 
-        <p class="mt-6 text-center text-sm text-gray-600">
-          Sudah punya akun?
-          <NuxtLink
-            to="/login"
-            class="font-medium text-primary hover:underline"
-          >Masuk</NuxtLink>
-        </p>
-      </template>
-    </section>
-  </main>
+      <p class="mt-6 text-center text-sm text-gray-600">
+        Sudah punya akun?
+        <UButton
+          to="/login"
+          variant="link"
+          class="p-0 align-baseline"
+        >
+          Masuk
+        </UButton>
+      </p>
+    </template>
+  </AuthShell>
 </template>

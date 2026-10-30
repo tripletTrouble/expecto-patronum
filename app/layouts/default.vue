@@ -10,17 +10,20 @@ async function logout() {
 
 <template>
   <div>
-    <header
+    <UContainer
       v-if="loggedIn"
+      as="header"
       class="flex justify-end px-4 py-3"
     >
-      <button
-        class="text-sm font-medium text-gray-700 hover:text-primary"
+      <UButton
+        color="neutral"
+        variant="ghost"
+        size="sm"
         @click="logout"
       >
         Keluar
-      </button>
-    </header>
+      </UButton>
+    </UContainer>
     <slot />
   </div>
 </template>
