@@ -1,4 +1,4 @@
-import type { Role, UserStatus } from '@prisma/client'
+import type { Role, UserStatus } from '../../prisma/generated/prisma/client'
 import type { H3Event } from 'h3'
 
 import prisma from './prisma'

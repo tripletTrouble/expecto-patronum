@@ -1,6 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['@nuxt/ui', '@nuxt/eslint', 'nuxt-auth-utils'],
+  modules: ['@nuxt/ui', '@nuxt/eslint', 'nuxt-auth-utils', '@nuxt/fonts'],
   devtools: { enabled: true },
   app: {
     head: {

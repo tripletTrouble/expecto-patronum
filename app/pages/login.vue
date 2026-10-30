@@ -5,6 +5,10 @@ const isSubmitting = ref(false)
 const showPassword = ref(false)
 const appConfig = useAppConfig()
 
+useHead({
+  title: `${appConfig.name} - Masuk`,
+})
+
 async function submitLogin() {
   errorMessage.value = ''
   isSubmitting.value = true
@@ -33,92 +37,95 @@ async function submitLogin() {
 </script>
 
 <template>
-  <main class="min-h-screen bg-gray-50 px-4 py-10 sm:py-16">
-    <section class="mx-auto w-full max-w-md rounded-xl bg-white p-6 shadow-sm sm:p-8">
-      <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900">
-          Masuk ke akun
-        </h1>
-        <p class="mt-2 text-sm text-gray-600">
-          Akses fitur sesuai dengan peranmu di {{ appConfig.name }}.
-        </p>
-      </div>
+  <AuthShell>
+    <div class="mb-8">
+      <h1 class="text-highlighted text-2xl font-bold">
+        Masuk ke akun
+      </h1>
+      <p class="text-muted mt-2 text-sm">
+        Akses fitur sesuai dengan peranmu di {{ appConfig.name }}.
+      </p>
+    </div>
 
-      <form
-        class="space-y-5"
-        @submit.prevent="submitLogin"
+    <UForm
+      :state="form"
+      class="space-y-5"
+      @submit.prevent="submitLogin"
+    >
+      <UFormField
+        label="Email"
+        name="email"
+        required
+        :ui="{ label: 'text-default', description: 'text-muted' }"
       >
-        <div>
-          <label
-            for="email"
-            class="mb-1 block text-sm font-medium text-gray-700"
-          >Email</label>
-          <input
-            id="email"
-            v-model="form.email"
-            name="email"
-            type="email"
-            autocomplete="email"
-            required
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-base text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-          >
-        </div>
+        <UInput
+          v-model="form.email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+          variant="outline"
+          class="w-full"
+          :ui="{ base: 'bg-transparent ring ring-inset ring-accented focus-visible:ring-2 focus-visible:ring-primary' }"
+        />
+      </UFormField>
 
-        <div>
-          <label
-            for="password"
-            class="mb-1 block text-sm font-medium text-gray-700"
-          >Kata sandi</label>
-          <div class="relative">
-            <input
-              id="password"
-              v-model="form.password"
-              name="password"
-              :type="showPassword ? 'text' : 'password'"
-              autocomplete="current-password"
-              required
-              class="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 text-base text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            >
-            <button
-              type="button"
+      <UFormField
+        label="Kata sandi"
+        name="password"
+        required
+        :ui="{ label: 'text-default', description: 'text-muted' }"
+      >
+        <UInput
+          v-model="form.password"
+          name="password"
+          :type="showPassword ? 'text' : 'password'"
+          autocomplete="current-password"
+          required
+          variant="outline"
+          class="w-full"
+          :ui="{ base: 'bg-transparent ring ring-inset ring-accented focus-visible:ring-2 focus-visible:ring-primary' }"
+        >
+          <template #trailing>
+            <UButton
+              color="neutral"
+              variant="link"
+              size="sm"
               :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
               :aria-pressed="showPassword"
-              class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700"
+              :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
               @click="showPassword = !showPassword"
-            >
-              <UIcon
-                :name="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-                class="h-5 w-5"
-                aria-hidden="true"
-              />
-            </button>
-          </div>
-        </div>
+            />
+          </template>
+        </UInput>
+      </UFormField>
 
-        <p
-          v-if="errorMessage"
-          role="alert"
-          class="rounded-md bg-red-50 p-3 text-sm text-red-700"
-        >
-          {{ errorMessage }}
-        </p>
+      <UAlert
+        v-if="errorMessage"
+        color="error"
+        variant="soft"
+        :description="errorMessage"
+        role="alert"
+      />
 
-        <button
-          type="submit"
-          :disabled="isSubmitting"
-          class="w-full rounded-md bg-primary px-4 py-2.5 font-medium text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {{ isSubmitting ? 'Memproses...' : 'Masuk' }}
-        </button>
-      </form>
+      <UButton
+        type="submit"
+        :loading="isSubmitting"
+        block
+      >
+        {{ isSubmitting ? 'Memproses...' : 'Masuk' }}
+      </UButton>
+    </UForm>
 
-      <p class="mt-6 text-center text-sm text-gray-600">
-        Belum punya akun?
-        <NuxtLink
-          to="/register"
-          class="font-medium text-primary hover:underline"
-        >Buat akun</NuxtLink>
-      </p>
-    </section>
-  </main>
+    <p class="text-muted mt-6 text-center text-sm">
+      Belum punya akun?
+      <UButton
+        to="/register"
+        variant="link"
+        class="p-0 align-baseline"
+      >
+        Buat akun
+      </UButton>
+    </p>
+  </AuthShell>
 </template>

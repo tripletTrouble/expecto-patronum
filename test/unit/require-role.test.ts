@@ -1,4 +1,4 @@
-import type { Role, UserStatus } from '@prisma/client'
+import type { Role, UserStatus } from '../../prisma/generated/prisma/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { requireRole } from '../../server/utils/require-role'

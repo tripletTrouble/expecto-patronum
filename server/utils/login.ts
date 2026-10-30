@@ -1,4 +1,4 @@
-import type { Role, UserStatus } from '@prisma/client'
+import type { Role, UserStatus } from '../../prisma/generated/prisma/client'
 import { z } from 'zod'
 
 import { prisma } from './prisma'
