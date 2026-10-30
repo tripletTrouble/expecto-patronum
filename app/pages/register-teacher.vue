@@ -183,7 +183,8 @@ async function submitRegistration() {
           <UInput
             v-model="form.email"
             name="email"
-            type="email"
+            type="text"
+            inputmode="email"
             autocomplete="email"
             required
             class="w-full"
