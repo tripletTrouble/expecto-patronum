@@ -10,13 +10,10 @@ const { getQuery, getRouterParam, requireRole, listPendingTeachers, changeTeache
 
 vi.mock('h3', () => ({ getQuery, getRouterParam }))
 vi.mock('../../server/utils/require-role', () => ({ requireRole }))
-vi.mock('../../server/utils/admin-teachers', () => ({
-  listPendingTeachers,
-  changeTeacherStatus,
-  TeacherStatusChangeError: class TeacherStatusChangeError extends Error {},
-  teacherIdSchema: { safeParse: (value: unknown) => ({ success: Boolean((value as { id?: string }).id?.startsWith('c')), data: value }) },
-  teacherPaginationSchema: { safeParse: (value: unknown) => ({ success: true, data: { page: 1, pageSize: 20, ...value as object } }) },
-}))
+vi.mock('../../server/utils/admin-teachers', async () => {
+  const actual = await vi.importActual<typeof import('../../server/utils/admin-teachers')>('../../server/utils/admin-teachers')
+  return { ...actual, listPendingTeachers, changeTeacherStatus }
+})
 
 describe('admin teacher endpoints', () => {
   beforeEach(() => {
@@ -50,11 +47,48 @@ describe('admin teacher endpoints', () => {
     expect(listPendingTeachers).toHaveBeenCalledWith(1, 20)
   })
 
-  it('requires admin authorization for status changes', async () => {
-    requireRole.mockRejectedValue({ statusCode: 403 })
+  it.each([
+    ['anonymous', { statusCode: 401 }],
+    ['student', { statusCode: 403 }],
+    ['teacher', { statusCode: 403 }],
+  ])('does not execute approval for a %s request', async (_actor, error) => {
+    requireRole.mockRejectedValue(error)
     const handler = (await import('../../server/api/admin/teachers/[id]/approve.post')).default
 
-    await expect(handler({} as never)).rejects.toMatchObject({ statusCode: 403 })
+    await expect(handler({} as never)).rejects.toMatchObject(error)
     expect(changeTeacherStatus).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['anonymous', { statusCode: 401 }],
+    ['student', { statusCode: 403 }],
+    ['teacher', { statusCode: 403 }],
+  ])('does not execute rejection for a %s request', async (_actor, error) => {
+    requireRole.mockRejectedValue(error)
+    const handler = (await import('../../server/api/admin/teachers/[id]/reject.post')).default
+
+    await expect(handler({} as never)).rejects.toMatchObject(error)
+    expect(changeTeacherStatus).not.toHaveBeenCalled()
+  })
+
+  it('rejects an invalid teacher ID before changing status', async () => {
+    requireRole.mockResolvedValue({ role: 'ADMIN', status: 'APPROVED' })
+    getRouterParam.mockReturnValue('not-a-cuid')
+    const handler = (await import('../../server/api/admin/teachers/[id]/approve.post')).default
+
+    await expect(handler({} as never)).rejects.toMatchObject({ statusCode: 400 })
+    expect(changeTeacherStatus).not.toHaveBeenCalled()
+  })
+
+  it('rejects invalid and unknown pagination query parameters', async () => {
+    requireRole.mockResolvedValue({ role: 'ADMIN', status: 'APPROVED' })
+    const handler = (await import('../../server/api/admin/teachers/pending.get')).default
+
+    getQuery.mockReturnValue({ page: '0' })
+    await expect(handler({} as never)).rejects.toMatchObject({ statusCode: 400 })
+
+    getQuery.mockReturnValue({ unexpected: 'value' })
+    await expect(handler({} as never)).rejects.toMatchObject({ statusCode: 400 })
+    expect(listPendingTeachers).not.toHaveBeenCalled()
   })
 })
