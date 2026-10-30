@@ -41,6 +41,11 @@ const emailError = computed(() => {
   }
 
   const email = form.email.trim()
+
+  if (!email) {
+    return 'Email wajib diisi.'
+  }
+
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
   if (!isValidEmail) {
