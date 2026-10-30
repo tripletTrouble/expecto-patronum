@@ -5,6 +5,10 @@ const isSubmitting = ref(false)
 const showPassword = ref(false)
 const appConfig = useAppConfig()
 
+useHead({
+  title: `${appConfig.name} - Masuk`,
+})
+
 async function submitLogin() {
   errorMessage.value = ''
   isSubmitting.value = true
@@ -35,10 +39,10 @@ async function submitLogin() {
 <template>
   <AuthShell>
     <div class="mb-8">
-      <h1 class="text-2xl font-bold text-gray-900">
+      <h1 class="text-highlighted text-2xl font-bold">
         Masuk ke akun
       </h1>
-      <p class="mt-2 text-sm text-gray-600">
+      <p class="text-muted mt-2 text-sm">
         Akses fitur sesuai dengan peranmu di {{ appConfig.name }}.
       </p>
     </div>
@@ -52,7 +56,7 @@ async function submitLogin() {
         label="Email"
         name="email"
         required
-        :ui="{ label: 'text-gray-700', description: 'text-gray-600' }"
+        :ui="{ label: 'text-default', description: 'text-muted' }"
       >
         <UInput
           v-model="form.email"
@@ -62,7 +66,7 @@ async function submitLogin() {
           required
           variant="outline"
           class="w-full"
-          :ui="{ base: 'bg-white ring-1 ring-gray-300 focus-visible:ring-2 focus-visible:ring-primary' }"
+          :ui="{ base: 'bg-transparent ring ring-inset ring-accented focus-visible:ring-2 focus-visible:ring-primary' }"
         />
       </UFormField>
 
@@ -70,7 +74,7 @@ async function submitLogin() {
         label="Kata sandi"
         name="password"
         required
-        :ui="{ label: 'text-gray-700', description: 'text-gray-600' }"
+        :ui="{ label: 'text-default', description: 'text-muted' }"
       >
         <UInput
           v-model="form.password"
@@ -80,7 +84,7 @@ async function submitLogin() {
           required
           variant="outline"
           class="w-full"
-          :ui="{ base: 'bg-white ring-1 ring-gray-300 focus-visible:ring-2 focus-visible:ring-primary' }"
+          :ui="{ base: 'bg-transparent ring ring-inset ring-accented focus-visible:ring-2 focus-visible:ring-primary' }"
         >
           <template #trailing>
             <UButton
@@ -113,7 +117,7 @@ async function submitLogin() {
       </UButton>
     </UForm>
 
-    <p class="mt-6 text-center text-sm text-gray-600">
+    <p class="text-muted mt-6 text-center text-sm">
       Belum punya akun?
       <UButton
         to="/register"

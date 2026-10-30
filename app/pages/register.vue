@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { TabsItem } from '@nuxt/ui'
+
 const form = reactive({
   name: '',
   email: '',
@@ -12,6 +14,76 @@ const isSubmitting = ref(false)
 const teacherRegistrationComplete = ref(false)
 const showPassword = ref(false)
 const showPasswordConfirmation = ref(false)
+
+const appConfig = useAppConfig()
+
+useHead({
+  title: `${appConfig.name} - Daftar`,
+})
+
+const nameError = computed(() => {
+  const name = form.name.trim()
+
+  if (!form.name) {
+    return undefined
+  }
+
+  if (!name) {
+    return 'Nama wajib diisi.'
+  }
+
+  if (name.length > 100) {
+    return 'Nama terlalu panjang.'
+  }
+
+  return undefined
+})
+
+const emailError = computed(() => {
+  if (!form.email) {
+    return undefined
+  }
+
+  const email = form.email.trim()
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+
+  if (!isValidEmail) {
+    return 'Email tidak valid.'
+  }
+
+  if (email.length > 320) {
+    return 'Email terlalu panjang.'
+  }
+
+  return undefined
+})
+
+const passwordError = computed(() => {
+  if (!form.password || form.password.length >= 8) {
+    return undefined
+  }
+
+  return 'Password minimal 8 karakter.'
+})
+
+const passwordConfirmationError = computed(() => {
+  if (!form.passwordConfirmation || form.password === form.passwordConfirmation) {
+    return undefined
+  }
+
+  return 'Password dan konfirmasi password tidak sama.'
+})
+
+const registrationTabs = [
+  {
+    label: 'Daftar sebagai siswa',
+    value: 'student',
+  },
+  {
+    label: 'Daftar sebagai guru',
+    value: 'teacher',
+  },
+] satisfies TabsItem[]
 
 async function submitRegistration() {
   errorMessage.value = ''
@@ -61,10 +133,10 @@ async function submitRegistration() {
       v-if="teacherRegistrationComplete"
       class="text-center"
     >
-      <h1 class="text-2xl font-bold text-gray-900">
+      <h1 class="text-highlighted text-2xl font-bold">
         Pendaftaran guru berhasil
       </h1>
-      <p class="mt-3 text-sm leading-6 text-gray-600">
+      <p class="text-muted mt-3 text-sm leading-6">
         Akunmu sedang menunggu persetujuan administrator. Setelah disetujui, kamu dapat masuk dan menggunakan fitur guru.
       </p>
       <UButton
@@ -77,49 +149,34 @@ async function submitRegistration() {
     </div>
 
     <template v-else>
+      <UAlert
+        :class="{ invisible: registrationType !== 'teacher' }"
+        color="warning"
+        variant="soft"
+        icon="i-lucide-info"
+        description="Akun guru perlu disetujui oleh administrator sebelum dapat digunakan untuk masuk dan mengakses fitur guru."
+        role="alert"
+        :aria-hidden="registrationType !== 'teacher'"
+        class="mb-6"
+      />
+
       <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">
+        <h1 class="text-highlighted text-2xl font-bold">
           Buat akun
         </h1>
-        <p class="mt-2 text-sm text-gray-600">
+        <p class="text-muted mt-2 text-sm">
           Pilih jenis akun yang ingin kamu daftarkan.
         </p>
       </div>
 
-      <UButtonGroup
-        class="mb-6 grid grid-cols-2 rounded-lg bg-gray-100 p-1"
-        role="tablist"
-        aria-label="Jenis akun"
-      >
-        <UButton
-          type="button"
-          role="tab"
-          :aria-selected="registrationType === 'student'"
-          :color="registrationType === 'student' ? 'primary' : 'neutral'"
-          :variant="registrationType === 'student' ? 'solid' : 'ghost'"
-          @click="registrationType = 'student'"
-        >
-          Daftar sebagai siswa
-        </UButton>
-        <UButton
-          type="button"
-          role="tab"
-          :aria-selected="registrationType === 'teacher'"
-          :color="registrationType === 'teacher' ? 'primary' : 'neutral'"
-          :variant="registrationType === 'teacher' ? 'solid' : 'ghost'"
-          @click="registrationType = 'teacher'"
-        >
-          Daftar sebagai guru
-        </UButton>
-      </UButtonGroup>
-
-      <UAlert
-        v-if="registrationType === 'teacher'"
-        color="info"
-        variant="soft"
-        description="Akun guru perlu disetujui oleh administrator sebelum dapat digunakan untuk masuk dan mengakses fitur guru."
-        role="alert"
-        class="mb-6"
+      <UTabs
+        v-model="registrationType"
+        :items="registrationTabs"
+        color="primary"
+        variant="pill"
+        :content="false"
+        :ui="{ list: 'w-full', trigger: 'grow' }"
+        class="mb-6 w-full"
       />
 
       <UForm
@@ -131,7 +188,7 @@ async function submitRegistration() {
           label="Nama"
           name="name"
           required
-          :ui="{ label: 'text-gray-700', description: 'text-gray-600' }"
+          :ui="{ label: 'text-default', description: 'text-muted' }"
         >
           <UInput
             v-model="form.name"
@@ -141,15 +198,21 @@ async function submitRegistration() {
             required
             variant="outline"
             class="w-full"
-            :ui="{ base: 'bg-white ring-1 ring-gray-300 focus-visible:ring-2 focus-visible:ring-primary' }"
+            :ui="{ base: 'bg-transparent ring ring-inset ring-accented focus-visible:ring-2 focus-visible:ring-primary' }"
           />
+          <p
+            class="min-h-4 text-xs leading-4 text-error"
+            aria-live="polite"
+          >
+            {{ nameError ?? ' ' }}
+          </p>
         </UFormField>
 
         <UFormField
           label="Email"
           name="email"
           required
-          :ui="{ label: 'text-gray-700', description: 'text-gray-600' }"
+          :ui="{ label: 'text-default', description: 'text-muted' }"
         >
           <UInput
             v-model="form.email"
@@ -159,16 +222,21 @@ async function submitRegistration() {
             required
             variant="outline"
             class="w-full"
-            :ui="{ base: 'bg-white ring-1 ring-gray-300 focus-visible:ring-2 focus-visible:ring-primary' }"
+            :ui="{ base: 'bg-transparent ring ring-inset ring-accented focus-visible:ring-2 focus-visible:ring-primary' }"
           />
+          <p
+            class="min-h-4 text-xs leading-4 text-error"
+            aria-live="polite"
+          >
+            {{ emailError ?? ' ' }}
+          </p>
         </UFormField>
 
         <UFormField
           label="Kata sandi"
           name="password"
-          description="Minimal 8 karakter."
           required
-          :ui="{ label: 'text-gray-700', description: 'text-gray-600' }"
+          :ui="{ label: 'text-default', description: 'text-muted' }"
         >
           <UInput
             v-model="form.password"
@@ -180,7 +248,7 @@ async function submitRegistration() {
             required
             variant="outline"
             class="w-full"
-            :ui="{ base: 'bg-white ring-1 ring-gray-300 focus-visible:ring-2 focus-visible:ring-primary' }"
+            :ui="{ base: 'bg-transparent ring ring-inset ring-accented focus-visible:ring-2 focus-visible:ring-primary' }"
           >
             <template #trailing>
               <UButton
@@ -194,13 +262,19 @@ async function submitRegistration() {
               />
             </template>
           </UInput>
+          <p
+            class="min-h-4 text-xs leading-4 text-error"
+            aria-live="polite"
+          >
+            {{ passwordError ?? ' ' }}
+          </p>
         </UFormField>
 
         <UFormField
           label="Konfirmasi kata sandi"
           name="passwordConfirmation"
           required
-          :ui="{ label: 'text-gray-700', description: 'text-gray-600' }"
+          :ui="{ label: 'text-default', description: 'text-muted' }"
         >
           <UInput
             v-model="form.passwordConfirmation"
@@ -212,7 +286,7 @@ async function submitRegistration() {
             required
             variant="outline"
             class="w-full"
-            :ui="{ base: 'bg-white ring-1 ring-gray-300 focus-visible:ring-2 focus-visible:ring-primary' }"
+            :ui="{ base: 'bg-transparent ring ring-inset ring-accented focus-visible:ring-2 focus-visible:ring-primary' }"
           >
             <template #trailing>
               <UButton
@@ -226,6 +300,12 @@ async function submitRegistration() {
               />
             </template>
           </UInput>
+          <p
+            class="min-h-4 text-xs leading-4 text-error"
+            aria-live="polite"
+          >
+            {{ passwordConfirmationError ?? ' ' }}
+          </p>
         </UFormField>
 
         <UAlert
@@ -245,7 +325,7 @@ async function submitRegistration() {
         </UButton>
       </UForm>
 
-      <p class="mt-6 text-center text-sm text-gray-600">
+      <p class="text-muted mt-6 text-center text-sm">
         Sudah punya akun?
         <UButton
           to="/login"

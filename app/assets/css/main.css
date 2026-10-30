@@ -1,6 +1,23 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+body {
+  @apply bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950;
+  font-family: Inter, sans-serif;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+  background:
+    radial-gradient(circle at 8% 28%, rgb(34 211 238 / 0.16), transparent 24rem),
+    radial-gradient(circle at 92% 12%, rgb(99 102 241 / 0.2), transparent 28rem),
+    radial-gradient(circle at 55% 100%, rgb(129 140 248 / 0.14), transparent 26rem);
+}
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,

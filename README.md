@@ -114,13 +114,14 @@ prisma/                      # schema, migrations and seed script
 
 ## Getting Started
 
-These steps run the current Nuxt scaffold created in issue #1. Prisma setup is covered by issue #5.
+These steps install the Nuxt application and its Prisma ORM dependencies.
 
 **Prerequisites:** [Bun](https://bun.sh).
 
 ```bash
 bun install
 cp .env.example .env
+bunx prisma generate
 bun run dev
 ```
 
@@ -207,11 +208,28 @@ Sources checked: [Supabase PostgreSQL connections](https://supabase.com/docs/gui
 
 ### Prisma commands
 
+This project uses Prisma ORM 7 with the PostgreSQL driver adapter. Prisma Client
+is generated into `prisma/generated/prisma`, and the runtime client uses the
+pooled `DATABASE_URL`. Prisma CLI migration commands use `DIRECT_URL` through
+`prisma.config.ts`.
+
 ```bash
-bunx prisma migrate dev      # create/apply migrations in dev
-bunx prisma generate         # generate Prisma Client
-bunx prisma studio           # browse data
+bunx prisma generate         # regenerate Prisma Client after schema changes
+bunx prisma migrate dev      # create/apply migrations in development
+bunx prisma migrate deploy  # apply existing migrations in deployment
+bunx prisma studio          # browse data
 ```
+
+Prisma ORM 7 no longer loads environment variables automatically. The root
+`prisma.config.ts` explicitly loads `.env` with `dotenv` and uses `DIRECT_URL`
+for Prisma CLI operations. Keep `DATABASE_URL` and `DIRECT_URL` in the local
+`.env` file or provide them through the deployment environment; never commit
+their values.
+
+After changing `prisma/schema.prisma`, run `bunx prisma generate` explicitly.
+Schema changes still require a Prisma migration. Prisma ORM 7 does not run the
+seed script automatically after migrations, so run `bunx prisma db seed` when a
+seed script is configured.
 
 ### Bootstrap the administrator
 
@@ -297,7 +315,7 @@ supported package export.
 
 Estimates assume one developer working roughly full-time. Double them for part-time work.
 
-- [ ] **M0: Setup** (1-2 days): repo, Nuxt, database, deploy pipeline
+- [x] **M0: Setup** (1-2 days): repo, Nuxt, database, deploy pipeline
 - [ ] **M1: Auth and approval** (3-4 days): seeded admin, register and login, roles, teacher approval
 - [ ] **M2: Question bank** (5-6 days): categories and all three question types
 - [ ] **M3: Exam builder** (3-4 days): create, configure and publish exams; share link and code

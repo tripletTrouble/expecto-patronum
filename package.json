@@ -10,14 +10,18 @@
     "lint": "eslint .",
     "preview": "nuxt preview",
     "test": "vitest run",
-    "postinstall": "nuxt prepare",
+    "postinstall": "nuxt prepare && prisma generate",
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@nuxt/fonts": "^1.2.0",
     "@nuxt/ui": "^4.12.0",
-    "@prisma/client": "6",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "dotenv": "^18.0.9",
     "nuxt": "^4.6.2",
     "nuxt-auth-utils": "0.5.34",
+    "pg": "^8.23.1",
     "tailwindcss": "^4.3.3",
     "vue": "^3.5.44",
     "vue-router": "^5.4.0"
@@ -26,7 +30,7 @@
     "@nuxt/eslint": "^1.17.0",
     "@nuxt/test-utils": "^4.3.4",
     "@types/node": "^26.6.5",
-    "prisma": "6",
+    "prisma": "7.10.1",
     "typescript": "^5.8.3",
     "vitest": "^5.0.5",
     "vue-tsc": "^3.3.13"

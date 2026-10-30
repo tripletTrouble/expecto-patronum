@@ -9,6 +9,9 @@ dist
 # Node dependencies
 node_modules
 
+# Generated Prisma Client
+prisma/generated
+
 # Logs
 logs
 *.log
@@ -22,3 +25,5 @@ logs
 .env
 .env.*
 !.env.example
+.vercel
+.env*
