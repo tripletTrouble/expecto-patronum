@@ -74,6 +74,11 @@ const passwordConfirmationError = computed(() => {
 async function submitRegistration() {
   errorMessage.value = ''
 
+  if (emailError.value) {
+    errorMessage.value = emailError.value
+    return
+  }
+
   if (form.password !== form.passwordConfirmation) {
     errorMessage.value = 'Konfirmasi kata sandi tidak cocok.'
     return
