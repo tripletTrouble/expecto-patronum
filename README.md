@@ -213,6 +213,46 @@ bunx prisma generate         # generate Prisma Client
 bunx prisma studio           # browse data
 ```
 
+### Bootstrap the administrator
+
+The first administrator is created by a one-off Nitro task. It is not an HTTP
+endpoint, so it cannot be called by an unauthenticated client. The task is
+idempotent: if any administrator already exists, it makes no changes.
+
+Set `ADMIN_EMAIL` and a strong, unique `ADMIN_PASSWORD` in the environment
+that has access to the target database, then run:
+
+```bash
+bun run bootstrap-admin
+```
+
+For a deployed Vercel project, run the command with the production environment
+variables:
+
+```bash
+vercel env run -e production -- bun run bootstrap-admin
+```
+
+Run Prisma migrations before bootstrapping the account:
+
+```bash
+DIRECT_URL="..." bunx prisma migrate deploy
+```
+
+The command prints only the task result. It never prints the password or its
+hash. After confirming that the administrator can log in, remove
+`ADMIN_PASSWORD` from the environment. Keep production and development
+administrator passwords different. Do not put either password in Git, the
+README, an issue, a pull request, or chat.
+
+Nuxt exposes `hashPassword` only inside the Nitro server runtime, while Prisma
+seed scripts run as standalone programs. The bootstrap uses an experimental
+Nitro task so it runs inside the same Nuxt server runtime and uses the same
+`hashPassword` helper as login. A public bootstrap route was rejected because
+it would create an unnecessary credentialed attack surface; a standalone
+script importing the private helper was rejected because that import is not a
+supported package export.
+
 ## Deployment
 
 ### Vercel (production)
