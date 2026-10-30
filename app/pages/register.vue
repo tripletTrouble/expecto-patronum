@@ -8,6 +8,8 @@ const form = reactive({
 
 const errorMessage = ref('')
 const isSubmitting = ref(false)
+const showPassword = ref(false)
+const showPasswordConfirmation = ref(false)
 
 async function submitRegistration() {
   errorMessage.value = ''
@@ -74,7 +76,7 @@ async function submitRegistration() {
             type="text"
             autocomplete="name"
             required
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-base outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+            class="w-full rounded-md border border-gray-300 px-3 py-2 text-base text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           >
         </div>
 
@@ -90,7 +92,7 @@ async function submitRegistration() {
             type="email"
             autocomplete="email"
             required
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-base outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+            class="w-full rounded-md border border-gray-300 px-3 py-2 text-base text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           >
         </div>
 
@@ -99,17 +101,32 @@ async function submitRegistration() {
             for="password"
             class="mb-1 block text-sm font-medium text-gray-700"
           >Kata sandi</label>
-          <input
-            id="password"
-            v-model="form.password"
-            name="password"
-            type="password"
-            autocomplete="new-password"
-            minlength="8"
-            maxlength="128"
-            required
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-base outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-          >
+          <div class="relative">
+            <input
+              id="password"
+              v-model="form.password"
+              name="password"
+              :type="showPassword ? 'text' : 'password'"
+              autocomplete="new-password"
+              minlength="8"
+              maxlength="128"
+              required
+              class="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 text-base text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            >
+            <button
+              type="button"
+              :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
+              :aria-pressed="showPassword"
+              class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700"
+              @click="showPassword = !showPassword"
+            >
+              <UIcon
+                :name="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                class="h-5 w-5"
+                aria-hidden="true"
+              />
+            </button>
+          </div>
           <p class="mt-1 text-xs text-gray-500">
             Minimal 8 karakter.
           </p>
@@ -120,17 +137,32 @@ async function submitRegistration() {
             for="passwordConfirmation"
             class="mb-1 block text-sm font-medium text-gray-700"
           >Konfirmasi kata sandi</label>
-          <input
-            id="passwordConfirmation"
-            v-model="form.passwordConfirmation"
-            name="passwordConfirmation"
-            type="password"
-            autocomplete="new-password"
-            minlength="8"
-            maxlength="128"
-            required
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-base outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-          >
+          <div class="relative">
+            <input
+              id="passwordConfirmation"
+              v-model="form.passwordConfirmation"
+              name="passwordConfirmation"
+              :type="showPasswordConfirmation ? 'text' : 'password'"
+              autocomplete="new-password"
+              minlength="8"
+              maxlength="128"
+              required
+              class="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 text-base text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            >
+            <button
+              type="button"
+              :aria-label="showPasswordConfirmation ? 'Sembunyikan konfirmasi kata sandi' : 'Tampilkan konfirmasi kata sandi'"
+              :aria-pressed="showPasswordConfirmation"
+              class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700"
+              @click="showPasswordConfirmation = !showPasswordConfirmation"
+            >
+              <UIcon
+                :name="showPasswordConfirmation ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                class="h-5 w-5"
+                aria-hidden="true"
+              />
+            </button>
+          </div>
         </div>
 
         <p
@@ -144,7 +176,7 @@ async function submitRegistration() {
         <button
           type="submit"
           :disabled="isSubmitting"
-          class="w-full rounded-md bg-indigo-600 px-4 py-2.5 font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+          class="w-full rounded-md bg-primary px-4 py-2.5 font-medium text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {{ isSubmitting ? 'Mendaftarkan...' : 'Daftar' }}
         </button>
