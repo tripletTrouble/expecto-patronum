@@ -35,11 +35,19 @@ const nameError = computed(() => {
   return undefined
 })
 
+const passwordError = computed(() => {
+  if (!form.password || form.password.length >= 8) {
+    return undefined
+  }
+
+  return 'Kata sandi minimal 8 karakter.'
+})
+
 async function submitRegistration() {
   errorMessage.value = ''
 
-  if (nameError.value) {
-    errorMessage.value = nameError.value
+  if (nameError.value || passwordError.value) {
+    errorMessage.value = nameError.value ?? passwordError.value ?? ''
     return
   }
 
@@ -177,6 +185,12 @@ async function submitRegistration() {
               />
             </template>
           </UInput>
+          <p
+            class="min-h-4 text-xs leading-4 text-error"
+            aria-live="polite"
+          >
+            {{ passwordError ?? ' ' }}
+          </p>
         </UFormField>
 
         <UFormField
