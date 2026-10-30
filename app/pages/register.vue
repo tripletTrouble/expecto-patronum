@@ -8,7 +8,6 @@ const form = reactive({
 
 const errorMessage = ref('')
 const isSubmitting = ref(false)
-const hasSubmitted = ref(false)
 const showPassword = ref(false)
 const showPasswordConfirmation = ref(false)
 
@@ -39,7 +38,11 @@ const nameError = computed(() => {
 const emailError = computed(() => {
   const email = form.email.trim()
 
-  if (!email && hasSubmitted.value) {
+  if (!form.email) {
+    return undefined
+  }
+
+  if (!email) {
     return 'Email wajib diisi.'
   }
 
@@ -74,7 +77,6 @@ const passwordConfirmationError = computed(() => {
 
 async function submitRegistration() {
   errorMessage.value = ''
-  hasSubmitted.value = true
 
   if (emailError.value) {
     errorMessage.value = emailError.value
