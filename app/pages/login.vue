@@ -3,6 +3,7 @@ const form = reactive({ email: '', password: '' })
 const errorMessage = ref('')
 const isSubmitting = ref(false)
 const showPassword = ref(false)
+const appConfig = useAppConfig()
 
 async function submitLogin() {
   errorMessage.value = ''
@@ -39,7 +40,7 @@ async function submitLogin() {
           Masuk ke akun
         </h1>
         <p class="mt-2 text-sm text-gray-600">
-          Masuk untuk mengikuti ujian dan melihat riwayatmu.
+          Akses fitur sesuai dengan peranmu di {{ appConfig.name }}.
         </p>
       </div>
 
