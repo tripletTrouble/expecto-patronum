@@ -17,8 +17,31 @@ useHead({
   title: `${appConfig.name} - Pendaftaran Guru`,
 })
 
+const nameError = computed(() => {
+  const name = form.name.trim()
+
+  if (!form.name) {
+    return undefined
+  }
+
+  if (!name) {
+    return 'Nama wajib diisi.'
+  }
+
+  if (name.length > 100) {
+    return 'Nama terlalu panjang.'
+  }
+
+  return undefined
+})
+
 async function submitRegistration() {
   errorMessage.value = ''
+
+  if (nameError.value) {
+    errorMessage.value = nameError.value
+    return
+  }
 
   if (form.password !== form.passwordConfirmation) {
     errorMessage.value = 'Konfirmasi kata sandi tidak cocok.'
@@ -104,6 +127,12 @@ async function submitRegistration() {
             required
             class="w-full"
           />
+          <p
+            class="min-h-4 text-xs leading-4 text-error"
+            aria-live="polite"
+          >
+            {{ nameError ?? ' ' }}
+          </p>
         </UFormField>
 
         <UFormField
