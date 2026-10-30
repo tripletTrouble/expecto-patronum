@@ -8,8 +8,8 @@ const adminEnvironmentSchema = z.object({
 })
 
 const host = '127.0.0.1'
-const port = '3456'
-const baseUrl = `http://${host}:${port}`
+const port = process.env.BOOTSTRAP_ADMIN_PORT ?? '3456'
+const baseUrl = process.env.BOOTSTRAP_ADMIN_URL ?? `http://${host}:${port}`
 
 const environment = adminEnvironmentSchema.safeParse({
   ADMIN_EMAIL: process.env.ADMIN_EMAIL,
@@ -21,13 +21,16 @@ if (!environment.success) {
   throw new Error(`Cannot bootstrap admin: ${messages}`)
 }
 
-const server = spawn(process.execPath, ['x', 'nuxt', 'dev', '--host', host, '--port', port], {
-  stdio: 'ignore',
-  env: process.env,
-})
+const startsServer = !process.env.BOOTSTRAP_ADMIN_URL
+const server = startsServer
+  ? spawn(process.execPath, ['x', 'nuxt', 'dev', '--host', host, '--port', port], {
+      stdio: 'inherit',
+      env: process.env,
+    })
+  : undefined
 
 function stopServer() {
-  if (!server.killed) {
+  if (server && !server.killed) {
     server.kill('SIGTERM')
   }
 }
@@ -35,19 +38,33 @@ function stopServer() {
 async function waitForServer() {
   for (let attempt = 0; attempt < 60; attempt++) {
     try {
-      await fetch(`${baseUrl}/api/health`)
-      return
+      const response = await fetch(`${baseUrl}/_nitro/tasks`)
+
+      if (response.ok) {
+        return
+      }
+
+      throw new Error(`Nitro returned HTTP ${response.status}`)
     }
-    catch {
+    catch (error) {
+      if (server?.exitCode !== null && server?.exitCode !== undefined) {
+        throw new Error(`The temporary Nuxt server exited with code ${server.exitCode}`, { cause: error })
+      }
+
+      if (attempt === 59) {
+        const reason = error instanceof Error ? `: ${error.message}` : ''
+        throw new Error(`The temporary Nuxt server did not expose Nitro tasks within 30 seconds${reason}`, { cause: error })
+      }
+
       await new Promise(resolve => setTimeout(resolve, 500))
     }
   }
-
-  throw new Error('The temporary Nuxt server did not start within 30 seconds')
 }
 
 try {
-  await waitForServer()
+  if (startsServer) {
+    await waitForServer()
+  }
 
   const task = spawn(process.execPath, [
     'x',

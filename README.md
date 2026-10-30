@@ -226,6 +226,17 @@ that has access to the target database, then run:
 bun run bootstrap-admin
 ```
 
+If a Nuxt server is already running, the command can use it directly instead
+of starting a second server:
+
+```bash
+BOOTSTRAP_ADMIN_URL=http://127.0.0.1:3000 bun run bootstrap-admin
+```
+
+Set `BOOTSTRAP_ADMIN_PORT` to change the temporary server's port. The command
+keeps the temporary Nuxt server's output visible so startup or database errors
+are actionable rather than becoming an opaque timeout.
+
 For a deployed Vercel project, run the command with the production environment
 variables:
 
