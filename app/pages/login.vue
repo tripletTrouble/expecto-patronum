@@ -117,7 +117,7 @@ async function submitLogin() {
         <NuxtLink
           to="/register"
           class="font-medium text-primary hover:underline"
-        >Daftar sebagai siswa</NuxtLink>
+        >Buat akun</NuxtLink>
       </p>
     </section>
   </main>
