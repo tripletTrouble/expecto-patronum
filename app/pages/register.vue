@@ -36,10 +36,6 @@ const nameError = computed(() => {
 })
 
 const emailError = computed(() => {
-  if (!form.email) {
-    return undefined
-  }
-
   const email = form.email.trim()
 
   if (!email) {

@@ -12,6 +12,7 @@ const registrationComplete = ref(false)
 const showPassword = ref(false)
 const showPasswordConfirmation = ref(false)
 const appConfig = useAppConfig()
+const runtimeConfig = useRuntimeConfig()
 
 useHead({
   title: `${appConfig.name} - Pendaftaran Guru`,
@@ -36,10 +37,6 @@ const nameError = computed(() => {
 })
 
 const emailError = computed(() => {
-  if (!form.email) {
-    return undefined
-  }
-
   const email = form.email.trim()
 
   if (!email) {
@@ -122,7 +119,10 @@ async function submitRegistration() {
         Pendaftaran guru berhasil
       </h1>
       <p class="text-muted mt-3 text-sm leading-6">
-        Akunmu sedang menunggu persetujuan administrator. Setelah disetujui, kamu dapat masuk dan menggunakan fitur guru.
+        Akunmu sedang menunggu persetujuan administrator. Setelah disetujui, kamu dapat masuk dan menggunakan fitur guru. Jika memiliki pertanyaan, <a
+          class="text-primary underline underline-offset-2"
+          :href="`mailto:${runtimeConfig.public.adminEmail}`"
+        >hubungi administrator</a> melalui email.
       </p>
       <UButton
         to="/login"

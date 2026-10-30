@@ -10,6 +10,11 @@ export default defineNuxtConfig({
     },
   },
   css: ['~/assets/css/main.css'],
+  runtimeConfig: {
+    public: {
+      adminEmail: process.env.ADMIN_EMAIL,
+    },
+  },
   compatibilityDate: '2025-07-15',
   nitro: {
     experimental: {
