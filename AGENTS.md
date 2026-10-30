@@ -52,6 +52,7 @@ Most bad changes come from confident guesses. Before you write or claim anything
 **Authentication and authorisation**
 
 - Enforce roles and account status **on the server, in every protected handler** (for example with a shared `requireRole` helper). Route middleware in the browser is UX only and is never a security boundary.
+- Every protected server handler must call `requireRole(event, allowedRoles)` before executing handler logic; ownership checks are applied after authentication and authorization.
 - Teachers must have status `APPROVED` to use any teacher endpoint. Check status on each request, not only at login.
 - **Check ownership.** A teacher may only read or change their own categories, questions, exams and results. Never trust an ID from the client without verifying it belongs to the current user.
 - Students may only read their own attempts and results. Guest attempts are accessed only with that attempt's own unguessable token.
