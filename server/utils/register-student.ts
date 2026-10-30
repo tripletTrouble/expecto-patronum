@@ -1,15 +1,13 @@
-import { Prisma } from '@prisma/client'
-import { z } from 'zod'
-
 import { prisma } from './prisma'
+import {
+  DuplicateRegistrationEmailError,
+  isDuplicateEmailError,
+  registrationSchema,
+} from './register'
+import type { RegistrationInput } from './register'
 
-export const studentRegistrationSchema = z.object({
-  name: z.string().trim().min(1, 'Nama wajib diisi').max(100, 'Nama terlalu panjang'),
-  email: z.string().trim().toLowerCase().email('Email tidak valid').max(320, 'Email terlalu panjang'),
-  password: z.string().min(8, 'Kata sandi minimal 8 karakter').max(128, 'Kata sandi maksimal 128 karakter'),
-}).strict()
-
-export type StudentRegistrationInput = z.infer<typeof studentRegistrationSchema>
+export const studentRegistrationSchema = registrationSchema
+export type StudentRegistrationInput = RegistrationInput
 
 export type RegisteredStudent = {
   id: string
@@ -19,9 +17,9 @@ export type RegisteredStudent = {
   status: 'APPROVED'
 }
 
-export class DuplicateStudentEmailError extends Error {
+export class DuplicateStudentEmailError extends DuplicateRegistrationEmailError {
   constructor() {
-    super('Email sudah terdaftar')
+    super()
     this.name = 'DuplicateStudentEmailError'
   }
 }
@@ -50,7 +48,7 @@ export async function registerStudent(input: StudentRegistrationInput): Promise<
     return { ...student, role: 'STUDENT', status: 'APPROVED' }
   }
   catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+    if (isDuplicateEmailError(error)) {
       throw new DuplicateStudentEmailError()
     }
 
