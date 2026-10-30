@@ -22,10 +22,15 @@ if (!environment.success) {
 }
 
 const startsServer = !process.env.BOOTSTRAP_ADMIN_URL
+const serverEnvironment = {
+  ...process.env,
+  CI: '1',
+  FORCE_COLOR: '0',
+}
 const server = startsServer
   ? spawn(process.execPath, ['x', 'nuxt', 'dev', '--host', host, '--port', port], {
       stdio: 'inherit',
-      env: process.env,
+      env: serverEnvironment,
     })
   : undefined
 
