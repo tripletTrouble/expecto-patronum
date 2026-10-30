@@ -1,0 +1,124 @@
+<script setup lang="ts">
+const form = reactive({ email: '', password: '' })
+const errorMessage = ref('')
+const isSubmitting = ref(false)
+const showPassword = ref(false)
+const appConfig = useAppConfig()
+
+async function submitLogin() {
+  errorMessage.value = ''
+  isSubmitting.value = true
+
+  try {
+    await $fetch('/api/auth/login', {
+      method: 'POST',
+      body: form,
+    })
+
+    await navigateTo('/')
+  }
+  catch (error: unknown) {
+    if (error && typeof error === 'object' && 'data' in error) {
+      const response = error.data as { message?: string } | undefined
+      errorMessage.value = response?.message ?? 'Login gagal. Silakan coba lagi.'
+    }
+    else {
+      errorMessage.value = 'Login gagal. Silakan coba lagi.'
+    }
+  }
+  finally {
+    isSubmitting.value = false
+  }
+}
+</script>
+
+<template>
+  <main class="min-h-screen bg-gray-50 px-4 py-10 sm:py-16">
+    <section class="mx-auto w-full max-w-md rounded-xl bg-white p-6 shadow-sm sm:p-8">
+      <div class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-900">
+          Masuk ke akun
+        </h1>
+        <p class="mt-2 text-sm text-gray-600">
+          Akses fitur sesuai dengan peranmu di {{ appConfig.name }}.
+        </p>
+      </div>
+
+      <form
+        class="space-y-5"
+        @submit.prevent="submitLogin"
+      >
+        <div>
+          <label
+            for="email"
+            class="mb-1 block text-sm font-medium text-gray-700"
+          >Email</label>
+          <input
+            id="email"
+            v-model="form.email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            required
+            class="w-full rounded-md border border-gray-300 px-3 py-2 text-base text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+          >
+        </div>
+
+        <div>
+          <label
+            for="password"
+            class="mb-1 block text-sm font-medium text-gray-700"
+          >Kata sandi</label>
+          <div class="relative">
+            <input
+              id="password"
+              v-model="form.password"
+              name="password"
+              :type="showPassword ? 'text' : 'password'"
+              autocomplete="current-password"
+              required
+              class="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 text-base text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            >
+            <button
+              type="button"
+              :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
+              :aria-pressed="showPassword"
+              class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700"
+              @click="showPassword = !showPassword"
+            >
+              <UIcon
+                :name="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                class="h-5 w-5"
+                aria-hidden="true"
+              />
+            </button>
+          </div>
+        </div>
+
+        <p
+          v-if="errorMessage"
+          role="alert"
+          class="rounded-md bg-red-50 p-3 text-sm text-red-700"
+        >
+          {{ errorMessage }}
+        </p>
+
+        <button
+          type="submit"
+          :disabled="isSubmitting"
+          class="w-full rounded-md bg-primary px-4 py-2.5 font-medium text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {{ isSubmitting ? 'Memproses...' : 'Masuk' }}
+        </button>
+      </form>
+
+      <p class="mt-6 text-center text-sm text-gray-600">
+        Belum punya akun?
+        <NuxtLink
+          to="/register"
+          class="font-medium text-primary hover:underline"
+        >Buat akun</NuxtLink>
+      </p>
+    </section>
+  </main>
+</template>
