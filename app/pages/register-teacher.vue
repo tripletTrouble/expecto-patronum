@@ -43,16 +43,19 @@ const passwordError = computed(() => {
   return 'Kata sandi minimal 8 karakter.'
 })
 
+const passwordConfirmationError = computed(() => {
+  if (!form.passwordConfirmation || form.password === form.passwordConfirmation) {
+    return undefined
+  }
+
+  return 'Kata sandi dan konfirmasi kata sandi tidak sama.'
+})
+
 async function submitRegistration() {
   errorMessage.value = ''
 
-  if (nameError.value || passwordError.value) {
-    errorMessage.value = nameError.value ?? passwordError.value ?? ''
-    return
-  }
-
-  if (form.password !== form.passwordConfirmation) {
-    errorMessage.value = 'Konfirmasi kata sandi tidak cocok.'
+  if (nameError.value || passwordError.value || passwordConfirmationError.value) {
+    errorMessage.value = nameError.value ?? passwordError.value ?? passwordConfirmationError.value ?? ''
     return
   }
 
@@ -219,6 +222,12 @@ async function submitRegistration() {
               />
             </template>
           </UInput>
+          <p
+            class="min-h-4 text-xs leading-4 text-error"
+            aria-live="polite"
+          >
+            {{ passwordConfirmationError ?? ' ' }}
+          </p>
         </UFormField>
 
         <UAlert
