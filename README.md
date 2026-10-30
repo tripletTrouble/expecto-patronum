@@ -226,6 +226,17 @@ that has access to the target database, then run:
 bun run bootstrap-admin
 ```
 
+If a Nuxt server is already running, the command can use it directly instead
+of starting a second server:
+
+```bash
+BOOTSTRAP_ADMIN_URL=http://127.0.0.1:3000 bun run bootstrap-admin
+```
+
+Set `BOOTSTRAP_ADMIN_PORT` to change the temporary server's port. The command
+keeps the temporary Nuxt server's output visible so startup or database errors
+are actionable rather than becoming an opaque timeout.
+
 For a deployed Vercel project, run the command with the production environment
 variables:
 
@@ -239,8 +250,9 @@ Run Prisma migrations before bootstrapping the account:
 DIRECT_URL="..." bunx prisma migrate deploy
 ```
 
-The command prints only the task result. It never prints the password or its
-hash. After confirming that the administrator can log in, remove
+The command prints its progress and whether the administrator was created or
+already existed. It never prints the password or its hash. After confirming
+that the administrator can log in, remove
 `ADMIN_PASSWORD` from the environment. Keep production and development
 administrator passwords different. Do not put either password in Git, the
 README, an issue, a pull request, or chat.
