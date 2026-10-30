@@ -61,35 +61,58 @@ async function waitForServer() {
   }
 }
 
+async function runBootstrapTask() {
+  const response = await fetch(`${baseUrl}/_nitro/tasks/bootstrap-admin`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ payload: {} }),
+  })
+
+  const body = await response.text()
+
+  if (!response.ok) {
+    throw new Error(`The admin bootstrap task failed with HTTP ${response.status}: ${body}`)
+  }
+
+  let result: unknown
+
+  try {
+    result = JSON.parse(body).result
+  }
+  catch (error) {
+    throw new Error('The admin bootstrap task returned invalid JSON', { cause: error })
+  }
+
+  if (typeof result !== 'object' || result === null || !('created' in result)) {
+    throw new Error('The admin bootstrap task returned an unexpected result')
+  }
+
+  if (result.created === true) {
+    console.info('Administrator created successfully.')
+  }
+  else if (result.created === false && 'reason' in result && result.reason === 'already_exists') {
+    console.info('Administrator already exists; no changes made.')
+  }
+  else {
+    throw new Error('The admin bootstrap task returned an unexpected result')
+  }
+}
+
 try {
-  if (startsServer) {
-    await waitForServer()
+  console.info(`Waiting for Nitro at ${baseUrl}...`)
+  await waitForServer()
+  console.info('Running administrator bootstrap...')
+  await runBootstrapTask()
+  console.info('Administrator bootstrap complete.')
+}
+catch (error) {
+  if (error instanceof Error) {
+    console.error(error.message)
   }
-
-  const task = spawn(process.execPath, [
-    'x',
-    'nuxt',
-    'task',
-    'run',
-    'bootstrap-admin',
-    '--url',
-    baseUrl,
-  ], {
-    stdio: 'inherit',
-    env: process.env,
-  })
-
-  const exitCode = await new Promise<number>((resolve) => {
-    task.on('close', code => resolve(code ?? 1))
-    task.on('error', (error) => {
-      console.error(error.message)
-      resolve(1)
-    })
-  })
-
-  if (exitCode !== 0) {
-    throw new Error(`The admin bootstrap task failed with exit code ${exitCode}`)
+  else {
+    console.error('The admin bootstrap task failed.')
   }
+  process.exitCode = 1
 }
 finally {
   stopServer()

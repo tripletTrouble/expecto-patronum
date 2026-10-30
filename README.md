@@ -250,8 +250,9 @@ Run Prisma migrations before bootstrapping the account:
 DIRECT_URL="..." bunx prisma migrate deploy
 ```
 
-The command prints only the task result. It never prints the password or its
-hash. After confirming that the administrator can log in, remove
+The command prints its progress and whether the administrator was created or
+already existed. It never prints the password or its hash. After confirming
+that the administrator can log in, remove
 `ADMIN_PASSWORD` from the environment. Keep production and development
 administrator passwords different. Do not put either password in Git, the
 README, an issue, a pull request, or chat.
