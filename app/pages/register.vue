@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { TabsItem } from '@nuxt/ui'
-
 const form = reactive({
   name: '',
   email: '',
@@ -8,17 +6,15 @@ const form = reactive({
   passwordConfirmation: '',
 })
 
-const registrationType = ref<'student' | 'teacher'>('student')
 const errorMessage = ref('')
 const isSubmitting = ref(false)
-const teacherRegistrationComplete = ref(false)
 const showPassword = ref(false)
 const showPasswordConfirmation = ref(false)
 
 const appConfig = useAppConfig()
 
 useHead({
-  title: `${appConfig.name} - Daftar`,
+  title: `${appConfig.name} - Pendaftaran Siswa`,
 })
 
 const nameError = computed(() => {
@@ -40,11 +36,16 @@ const nameError = computed(() => {
 })
 
 const emailError = computed(() => {
+  const email = form.email.trim()
+
   if (!form.email) {
     return undefined
   }
 
-  const email = form.email.trim()
+  if (!email) {
+    return 'Email wajib diisi.'
+  }
+
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
   if (!isValidEmail) {
@@ -74,19 +75,13 @@ const passwordConfirmationError = computed(() => {
   return 'Password dan konfirmasi password tidak sama.'
 })
 
-const registrationTabs = [
-  {
-    label: 'Daftar sebagai siswa',
-    value: 'student',
-  },
-  {
-    label: 'Daftar sebagai guru',
-    value: 'teacher',
-  },
-] satisfies TabsItem[]
-
 async function submitRegistration() {
   errorMessage.value = ''
+
+  if (emailError.value) {
+    errorMessage.value = emailError.value
+    return
+  }
 
   if (form.password !== form.passwordConfirmation) {
     errorMessage.value = 'Konfirmasi kata sandi tidak cocok.'
@@ -96,7 +91,7 @@ async function submitRegistration() {
   isSubmitting.value = true
 
   try {
-    await $fetch(registrationType.value === 'teacher' ? '/api/auth/register-teacher' : '/api/auth/register', {
+    await $fetch('/api/auth/register', {
       method: 'POST',
       body: {
         name: form.name,
@@ -105,12 +100,7 @@ async function submitRegistration() {
       },
     })
 
-    if (registrationType.value === 'teacher') {
-      teacherRegistrationComplete.value = true
-    }
-    else {
-      await navigateTo('/')
-    }
+    await navigateTo('/')
   }
   catch (error: unknown) {
     if (error && typeof error === 'object' && 'data' in error) {
@@ -129,55 +119,15 @@ async function submitRegistration() {
 
 <template>
   <AuthShell>
-    <div
-      v-if="teacherRegistrationComplete"
-      class="text-center"
-    >
-      <h1 class="text-highlighted text-2xl font-bold">
-        Pendaftaran guru berhasil
-      </h1>
-      <p class="text-muted mt-3 text-sm leading-6">
-        Akunmu sedang menunggu persetujuan administrator. Setelah disetujui, kamu dapat masuk dan menggunakan fitur guru.
-      </p>
-      <UButton
-        to="/login"
-        variant="link"
-        class="mt-6"
-      >
-        Kembali ke halaman masuk
-      </UButton>
-    </div>
-
-    <template v-else>
-      <UAlert
-        :class="{ invisible: registrationType !== 'teacher' }"
-        color="warning"
-        variant="soft"
-        icon="i-lucide-info"
-        description="Akun guru perlu disetujui oleh administrator sebelum dapat digunakan untuk masuk dan mengakses fitur guru."
-        role="alert"
-        :aria-hidden="registrationType !== 'teacher'"
-        class="mb-6"
-      />
-
+    <div>
       <div class="mb-6">
         <h1 class="text-highlighted text-2xl font-bold">
-          Buat akun
+          Buat akun siswa
         </h1>
         <p class="text-muted mt-2 text-sm">
-          Pilih jenis akun yang ingin kamu daftarkan.
+          Daftar sebagai siswa untuk menyimpan riwayat ujian dan mengikuti ujian khusus akun.
         </p>
       </div>
-
-      <UTabs
-        v-model="registrationType"
-        :items="registrationTabs"
-        color="primary"
-        variant="pill"
-        :content="false"
-        :ui="{ list: 'w-full', trigger: 'grow' }"
-        class="mb-6 w-full"
-      />
 
       <UForm
         :state="form"
@@ -217,7 +167,8 @@ async function submitRegistration() {
           <UInput
             v-model="form.email"
             name="email"
-            type="email"
+            type="text"
+            inputmode="email"
             autocomplete="email"
             required
             variant="outline"
@@ -335,6 +286,17 @@ async function submitRegistration() {
           Masuk
         </UButton>
       </p>
-    </template>
+
+      <p class="text-muted mt-3 text-center text-sm">
+        Ingin mendaftar sebagai guru?
+        <UButton
+          to="/register-teacher"
+          variant="link"
+          class="p-0 align-baseline"
+        >
+          Daftar sebagai guru
+        </UButton>
+      </p>
+    </div>
   </AuthShell>
 </template>
