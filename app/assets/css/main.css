@@ -6,6 +6,10 @@ body {
   font-family: Inter, sans-serif;
 }
 
+body.dashboard-page {
+  overflow: hidden;
+}
+
 body::before {
   position: fixed;
   inset: 0;
