@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { enforceRateLimit, RateLimitExceededError } from '../../server/utils/rate-limit'
+import { Prisma } from '../../prisma/generated/prisma/client'
+import { getRequestIP } from 'h3'
+import { enforceRateLimit, RateLimitExceededError, RateLimitUnavailableError } from '../../server/utils/rate-limit'
 
 const { findUnique, upsert, update, transaction } = vi.hoisted(() => ({
   findUnique: vi.fn(),
@@ -22,6 +24,7 @@ vi.mock('h3', () => ({
 describe('authentication rate limiting', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(getRequestIP).mockReturnValue(undefined)
     transaction.mockImplementation(async (callback: (client: unknown) => Promise<boolean>) => callback({
       rateLimitCounter: { findUnique, upsert, update },
     }))
@@ -49,5 +52,33 @@ describe('authentication rate limiting', () => {
     expect(upsert).toHaveBeenCalledWith(expect.objectContaining({
       update: expect.objectContaining({ count: 1 }),
     }))
+  })
+
+  it('does not enable forwarded-header parsing for the IP safeguard', async () => {
+    vi.mocked(getRequestIP).mockReturnValue('192.0.2.1')
+
+    await enforceRateLimit({} as never, 'login', 'user@example.test')
+
+    expect(getRequestIP).toHaveBeenCalledWith({})
+    expect(upsert).toHaveBeenCalledTimes(2)
+  })
+
+  it('retries serialization conflicts and succeeds', async () => {
+    transaction.mockRejectedValueOnce(new Prisma.PrismaClientKnownRequestError('Serialization conflict', {
+      code: 'P2034', clientVersion: '7.10.1',
+    }))
+
+    await expect(enforceRateLimit({} as never, 'login', 'user@example.test')).resolves.toBeUndefined()
+    expect(transaction).toHaveBeenCalledTimes(2)
+  })
+
+  it('returns a controlled error after repeated serialization conflicts', async () => {
+    transaction.mockRejectedValue(new Prisma.PrismaClientKnownRequestError('Serialization conflict', {
+      code: 'P2034', clientVersion: '7.10.1',
+    }))
+
+    await expect(enforceRateLimit({} as never, 'login', 'user@example.test'))
+      .rejects.toBeInstanceOf(RateLimitUnavailableError)
+    expect(transaction).toHaveBeenCalledTimes(3)
   })
 })

@@ -6,7 +6,7 @@ import {
   loginUser,
   TeacherApprovalError,
 } from '../../utils/login'
-import { enforceRateLimit, RateLimitExceededError } from '../../utils/rate-limit'
+import { enforceRateLimit, RateLimitExceededError, RateLimitUnavailableError } from '../../utils/rate-limit'
 
 export default defineEventHandler(async (event) => {
   const result = loginSchema.safeParse(await readBody(event))
@@ -30,6 +30,9 @@ export default defineEventHandler(async (event) => {
   catch (error) {
     if (error instanceof RateLimitExceededError) {
       throw createError({ statusCode: 429, statusMessage: 'Too Many Requests', message: error.message })
+    }
+    if (error instanceof RateLimitUnavailableError) {
+      throw createError({ statusCode: 503, statusMessage: 'Service Unavailable', message: error.message })
     }
     if (error instanceof TeacherApprovalError) {
       throw createError({

@@ -1,3 +1,4 @@
+import { Prisma } from '../../prisma/generated/prisma/client'
 import { getRequestIP, type H3Event } from 'h3'
 import { isIP } from 'node:net'
 
@@ -27,12 +28,20 @@ export class RateLimitExceededError extends Error {
   }
 }
 
+export class RateLimitUnavailableError extends Error {
+  constructor() {
+    super('Layanan sedang sibuk. Silakan coba lagi.')
+    this.name = 'RateLimitUnavailableError'
+  }
+}
+
 function getClientIp(event: H3Event): string | undefined {
-  const ip = getRequestIP(event, { xForwardedFor: true })
+  // The deployment adapter supplies the trusted client address through H3's event context.
+  const ip = getRequestIP(event)
   return ip && isIP(ip) > 0 ? ip : undefined
 }
 
-async function consume(key: string, limit: number, windowMs: number, now: Date): Promise<boolean> {
+async function consumeOnce(key: string, limit: number, windowMs: number, now: Date): Promise<boolean> {
   const windowStart = new Date(now.getTime() - (now.getTime() % windowMs))
 
   return prisma.$transaction(async (transaction) => {
@@ -57,6 +66,24 @@ async function consume(key: string, limit: number, windowMs: number, now: Date):
     })
     return true
   }, { isolationLevel: 'Serializable' })
+}
+
+async function consume(key: string, limit: number, windowMs: number, now: Date): Promise<boolean> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      return await consumeOnce(key, limit, windowMs, now)
+    }
+    catch (error) {
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2034') {
+        throw error
+      }
+      if (attempt === 2) {
+        throw new RateLimitUnavailableError()
+      }
+    }
+  }
+
+  throw new RateLimitUnavailableError()
 }
 
 export async function enforceRateLimit(

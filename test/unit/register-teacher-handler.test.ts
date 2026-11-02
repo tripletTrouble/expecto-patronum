@@ -12,6 +12,7 @@ vi.mock('../../server/utils/register-teacher', () => ({ registerTeacher }))
 vi.mock('../../server/utils/rate-limit', () => ({
   enforceRateLimit: vi.fn(),
   RateLimitExceededError: class RateLimitExceededError extends Error {},
+  RateLimitUnavailableError: class RateLimitUnavailableError extends Error {},
 }))
 
 describe('teacher registration endpoint', () => {
