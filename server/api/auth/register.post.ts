@@ -5,6 +5,7 @@ import {
   registerStudent,
   studentRegistrationSchema,
 } from '../../utils/register-student'
+import { enforceRateLimit, RateLimitExceededError, RateLimitUnavailableError } from '../../utils/rate-limit'
 
 export default defineEventHandler(async (event) => {
   const result = studentRegistrationSchema.safeParse(await readBody(event))
@@ -18,6 +19,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    await enforceRateLimit(event, 'studentRegistration', result.data.email)
     const student = await registerStudent(result.data)
 
     await setUserSession(event, { user: { id: student.id } })
@@ -25,6 +27,12 @@ export default defineEventHandler(async (event) => {
     return student
   }
   catch (error) {
+    if (error instanceof RateLimitExceededError) {
+      throw createError({ statusCode: 429, statusMessage: 'Too Many Requests', message: error.message })
+    }
+    if (error instanceof RateLimitUnavailableError) {
+      throw createError({ statusCode: 503, statusMessage: 'Service Unavailable', message: error.message })
+    }
     if (error instanceof DuplicateStudentEmailError) {
       throw createError({
         statusCode: 409,
