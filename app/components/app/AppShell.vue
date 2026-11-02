@@ -3,9 +3,9 @@ import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui'
 
 const { clear } = useUserSession()
 const route = useRoute()
-const { data: currentUser } = await useFetch<{ name: string, email: string, role: string }>('/api/auth/me')
+const { data: currentUser } = await useFetch<{ name: string, email: string, role: 'ADMIN' | 'TEACHER' | 'STUDENT' }>('/api/auth/me')
 
-const navigation: NavigationMenuItem[][] = [[
+const navigationItems: Array<NavigationMenuItem & { roles?: Array<'ADMIN' | 'TEACHER' | 'STUDENT'> }> = [
   {
     label: 'Beranda',
     icon: 'i-lucide-house',
@@ -15,8 +15,13 @@ const navigation: NavigationMenuItem[][] = [[
     label: 'Persetujuan guru',
     icon: 'i-lucide-user-check',
     to: '/admin/teachers',
+    roles: ['ADMIN'],
   },
-]]
+]
+
+const navigation = computed<NavigationMenuItem[][]>(() => [[
+  ...navigationItems.filter(item => !item.roles || item.roles.includes(currentUser.value?.role ?? 'STUDENT')),
+]])
 
 const pageTitles: Record<string, string> = {
   '/': 'Beranda',

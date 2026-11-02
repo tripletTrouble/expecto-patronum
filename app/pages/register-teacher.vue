@@ -14,6 +14,8 @@ const showPasswordConfirmation = ref(false)
 const appConfig = useAppConfig()
 const runtimeConfig = useRuntimeConfig()
 
+definePageMeta({ middleware: 'guest' })
+
 useHead({
   title: `${appConfig.name} - Pendaftaran Guru`,
 })
