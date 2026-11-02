@@ -39,12 +39,13 @@ async function logout() {
 
 <template>
   <div class="grid h-dvh min-h-0 w-full place-items-center overflow-hidden p-3 sm:p-4 lg:p-6">
-    <UDashboardGroup class="!relative !inset-auto h-[calc(100dvh-1.5rem)] min-h-0 w-[97vw] overflow-hidden rounded-2xl border border-muted bg-transparent shadow-[0_1.5rem_4rem_rgb(2_8_23_/_0.35)] sm:h-[calc(100dvh-2rem)] lg:h-[min(calc(100dvh-3rem),56rem)] lg:w-[97vw]">
+    <UDashboardGroup class="relative! inset-auto! h-[calc(100dvh-1.5rem)] min-h-0 w-[97vw] overflow-hidden inset-shadow-sm inset-shadow-black/10 bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/20 dark:border-white/10 ring-1 ring-inset ring-white/10 dark:ring-white/5 shadow-2xl shadow-black/10 rounded-2xl sm:h-[calc(100dvh-2rem)] lg:h-[min(calc(100dvh-3rem),56rem)] lg:w-[97vw]">
       <UDashboardSidebar
         collapsible
         :ui="{
-          root: ' backdrop-blur-sm border-r ',
+          root: 'border-r border-white/20 dark:border-white/10',
           body: 'px-3',
+          header: 'border-b border-white/20 dark:border-white/10',
         }"
       >
         <template #header="{ collapsed }">
@@ -54,7 +55,7 @@ async function logout() {
             aria-label="Expecto Patronum, beranda"
           >
             <span
-              class="grid size-9 shrink-0 place-items-center rounded-lg rounded-br-sm bg-rose-400 font-bold tracking-wider text-indigo-950"
+              class="grid size-9 shrink-0 place-items-center rounded-lg rounded-br-sm bg-white font-bold tracking-wider text-indigo-950"
               aria-hidden="true"
             >
               EP
@@ -94,16 +95,17 @@ async function logout() {
       </UDashboardSidebar>
 
       <UDashboardPanel
-        class="min-h-0 backdrop-blur-sm"
+        class="min-h-0"
         :ui="{
-          root: 'border-l border-black/30',
-          body: 'min-h-0 overflow-y-auto bg-transparent',
+          body: 'min-h-0 overflow-y-auto',
         }"
       >
         <template #header>
           <UDashboardNavbar
             :title="pageTitle"
-            class=" backdrop-blur-sm"
+            :ui="{
+              root: 'border-b border-white/20 dark:border-white/10',
+            }"
           >
             <template #leading>
               <UDashboardSidebarCollapse />
