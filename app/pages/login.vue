@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { safeRedirect } from '../utils/safe-redirect'
+
 const form = reactive({ email: '', password: '' })
 const errorMessage = ref('')
 const isSubmitting = ref(false)
 const showPassword = ref(false)
 const appConfig = useAppConfig()
+const route = useRoute()
 
 useHead({
   title: `${appConfig.name} - Masuk`,
@@ -19,7 +22,7 @@ async function submitLogin() {
       body: form,
     })
 
-    await navigateTo('/')
+    await navigateTo(safeRedirect(route.query.redirect))
   }
   catch (error: unknown) {
     if (error && typeof error === 'object' && 'data' in error) {

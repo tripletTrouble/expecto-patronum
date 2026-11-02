@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   changeTeacherStatus,
   listPendingTeachers,
+  teacherQuerySchema,
   TeacherStatusChangeError,
 } from '../../server/utils/admin-teachers'
 
@@ -35,22 +36,39 @@ describe('admin teacher moderation', () => {
     vi.clearAllMocks()
   })
 
-  it('lists only pending teachers with pagination and public fields', async () => {
+  it('lists teachers with filters, pagination, summary and public fields', async () => {
     findMany.mockResolvedValue([teacher])
-    count.mockResolvedValue(21)
+    count.mockResolvedValueOnce(21).mockResolvedValueOnce(7).mockResolvedValueOnce(10).mockResolvedValueOnce(4)
     transaction.mockImplementation((queries: Promise<unknown>[]) => Promise.all(queries))
 
-    await expect(listPendingTeachers(2, 10)).resolves.toEqual({
+    await expect(listPendingTeachers({ page: 2, pageSize: 10, search: 'guru', status: 'PENDING' })).resolves.toEqual({
       data: [teacher],
       pagination: { page: 2, pageSize: 10, total: 21, totalPages: 3 },
+      summary: { totalRegistration: 21, totalPending: 7, totalApproved: 10, totalRejected: 4 },
     })
     expect(findMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: { role: 'TEACHER', status: 'PENDING' },
+      where: {
+        role: 'TEACHER',
+        status: 'PENDING',
+        OR: [
+          { name: { contains: 'guru', mode: 'insensitive' } },
+          { email: { contains: 'guru', mode: 'insensitive' } },
+        ],
+      },
       skip: 10,
       take: 10,
-      select: { id: true, name: true, email: true, createdAt: true },
+      select: { id: true, name: true, email: true, createdAt: true, status: true },
     }))
     expect(findMany.mock.calls[0][0].select).not.toHaveProperty('passwordHash')
+  })
+
+  it('rejects impossible dates and reversed date ranges', () => {
+    expect(teacherQuerySchema.safeParse({ registeredFrom: '2026-02-30' }).success).toBe(false)
+    expect(teacherQuerySchema.safeParse({ registeredFrom: '2026-03-10', registeredTo: '2026-03-01' }).success).toBe(false)
+  })
+
+  it('defaults to pending teachers when no status is supplied', () => {
+    expect(teacherQuerySchema.parse({}).status).toBe('PENDING')
   })
 
   it('does not change a rejected teacher', async () => {

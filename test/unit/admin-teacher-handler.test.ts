@@ -22,7 +22,7 @@ describe('admin teacher endpoints', () => {
     vi.stubGlobal('createError', (error: unknown) => error)
     getQuery.mockReturnValue({})
     getRouterParam.mockReturnValue('ckz5h0p8x0000s0m4b3q7r2k1')
-    listPendingTeachers.mockResolvedValue({ data: [], pagination: { page: 1, pageSize: 20, total: 0, totalPages: 0 } })
+    listPendingTeachers.mockResolvedValue({ data: [], pagination: { page: 1, pageSize: 20, total: 0, totalPages: 0 }, summary: { totalRegistration: 0, totalPending: 0, totalApproved: 0, totalRejected: 0 } })
     changeTeacherStatus.mockResolvedValue({ id: 'teacher-1', status: 'APPROVED' })
   })
 
@@ -44,7 +44,7 @@ describe('admin teacher endpoints', () => {
 
     await expect(handler({} as never)).resolves.toMatchObject({ data: [] })
     expect(requireRole).toHaveBeenCalledWith({}, ['ADMIN'])
-    expect(listPendingTeachers).toHaveBeenCalledWith(1, 20)
+    expect(listPendingTeachers).toHaveBeenCalledWith({ page: 1, pageSize: 20, status: 'PENDING' })
   })
 
   it.each([
