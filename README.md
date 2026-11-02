@@ -186,6 +186,16 @@ curl -i http://localhost:3000/api/health
 - The response includes `Cache-Control: no-store` and contains no database details or error messages. Failure details are logged on the server only.
 - Only `GET` is accepted.
 
+### Authentication rate limits
+
+The login, student registration, and teacher registration endpoints use a PostgreSQL-backed rate limiter so counters are shared across short-lived serverless instances. Each endpoint has a primary counter keyed by the normalized email address and a separate, higher-threshold safeguard keyed by the client IP address. The email limits are 5 requests per 15 minutes for login and 3 requests per hour for each registration endpoint. The IP limits are 100 requests per 15 minutes for login and 50 requests per hour for each registration endpoint.
+
+Email is the primary key because it protects the account or address being targeted. IP is only a generous secondary safeguard: schools, mobile carriers, and other networks may put many legitimate users behind one public IP, so the IP limit is not intended to lock out normal users. The application does not use country, region, or subnet blocking. Requests over either limit receive HTTP `429` with an Indonesian message. A window resets automatically when the next request arrives after the window boundary.
+
+The IP is obtained through H3's request-IP helper, configured to understand the hosting proxy's forwarded address, and is accepted only when it validates as an IP address. The application must run behind a trusted proxy that sets forwarded request metadata; arbitrary client headers must not be treated as authoritative. If no valid IP is available, only the email counter is used. `/api/health` is not rate limited.
+
+We compared this database approach with a hosting-provider rate-limiting feature. Provider limits can be useful, but availability and quotas depend on the selected plan and would move endpoint-specific policy outside this repository. PostgreSQL is already required, shared by all instances, and gives us readable, versioned limits without adding a service or dependency, so it is the simpler option for this application. The counters are stored in the `RateLimitCounter` table and updated in serializable transactions.
+
 Supabase's current connection guidance uses:
 
 - `DATABASE_URL`: the shared pooler **transaction-mode** connection (port `6543`) for the running Nuxt serverless application. Transaction mode is intended for serverless functions with many short-lived connections.

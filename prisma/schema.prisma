@@ -31,3 +31,10 @@ model User {
   status       UserStatus
   createdAt    DateTime   @default(now())
 }
+
+model RateLimitCounter {
+  key         String   @id
+  count       Int
+  windowStart DateTime
+  updatedAt   DateTime @updatedAt
+}
