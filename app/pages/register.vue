@@ -13,6 +13,8 @@ const showPasswordConfirmation = ref(false)
 
 const appConfig = useAppConfig()
 
+definePageMeta({ middleware: 'guest' })
+
 useHead({
   title: `${appConfig.name} - Pendaftaran Siswa`,
 })

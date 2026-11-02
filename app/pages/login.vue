@@ -8,6 +8,8 @@ const showPassword = ref(false)
 const appConfig = useAppConfig()
 const route = useRoute()
 
+definePageMeta({ middleware: 'guest' })
+
 useHead({
   title: `${appConfig.name} - Masuk`,
 })

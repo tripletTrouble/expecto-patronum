@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
 
-definePageMeta({ layout: 'dashboard', middleware: 'admin' })
+definePageMeta({ layout: 'dashboard' })
 
 useHead({ title: 'Persetujuan guru - Expecto Patronum' })
 
