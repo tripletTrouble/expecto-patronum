@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { NavigationMenuItem } from '@nuxt/ui'
+import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui'
 
 const { clear } = useUserSession()
 const route = useRoute()
+const { data: currentUser } = await useFetch<{ name: string, email: string, role: string }>('/api/auth/me')
 
 const navigation: NavigationMenuItem[][] = [[
   {
@@ -23,6 +24,33 @@ const pageTitles: Record<string, string> = {
 }
 
 const pageTitle = computed(() => pageTitles[route.path] ?? 'Dashboard')
+const userInitials = computed(() => currentUser.value?.name
+  .split(/\s+/)
+  .filter(Boolean)
+  .slice(0, 2)
+  .map(name => name.charAt(0).toUpperCase())
+  .join('') || '?')
+
+const userMenuItems = computed<DropdownMenuItem[][]>(() => [[
+  {
+    label: currentUser.value?.name ?? 'Pengguna',
+    description: currentUser.value?.email ?? '',
+    type: 'label',
+  },
+], [
+  {
+    label: 'Pengaturan profil (segera hadir)',
+    icon: 'i-lucide-user-cog',
+    disabled: true,
+  },
+], [
+  {
+    label: 'Keluar',
+    icon: 'i-lucide-log-out',
+    color: 'error',
+    onSelect: logout,
+  },
+]])
 
 useHead({
   bodyAttrs: {
@@ -43,8 +71,8 @@ async function logout() {
       <UDashboardSidebar
         collapsible
         :ui="{
-          root: 'border-r border-white/20 dark:border-white/10',
-          body: 'px-3',
+          root: 'h-full min-h-0 border-r border-white/20 dark:border-white/10',
+          body: 'min-h-0 px-3',
           header: 'border-b border-white/20 dark:border-white/10',
         }"
       >
@@ -81,16 +109,42 @@ async function logout() {
         </template>
 
         <template #footer="{ collapsed }">
-          <UButton
-            icon="i-lucide-log-out"
-            :label="collapsed ? undefined : 'Keluar'"
-            color="neutral"
-            variant="ghost"
-            :square="collapsed"
-            block
-            class="text-indigo-100 hover:bg-black/30 hover:text-white"
-            @click="logout"
-          />
+          <div class="w-full">
+            <UDropdownMenu
+              :items="userMenuItems"
+              :content="{ side: 'top', align: 'start', sideOffset: 8 }"
+              :ui="{ content: 'w-72 bg-[rgb(255_255_255_/_0.08)] backdrop-blur-xl border border-white/16 shadow-xl shadow-black/20', viewport: 'divide-y divide-white/16', separator: 'bg-white/16' }"
+            >
+              <UButton
+                color="neutral"
+                variant="ghost"
+                :square="collapsed"
+                :block="!collapsed"
+                class="w-full justify-start text-indigo-100 hover:bg-white/20 bg-white/10 hover:text-white"
+                :aria-label="`Menu pengguna ${currentUser?.name ?? ''}`"
+              >
+                <span
+                  class="grid size-9 shrink-0 place-items-center rounded-full bg-indigo-300 font-semibold text-indigo-950"
+                  aria-hidden="true"
+                >
+                  {{ userInitials }}
+                </span>
+                <span
+                  v-if="!collapsed"
+                  class="min-w-0 flex-1 text-left"
+                >
+                  <span class="block truncate font-medium">{{ currentUser?.name ?? 'Memuat pengguna...' }}</span>
+                  <span class="block truncate text-xs text-indigo-200">{{ currentUser?.email ?? '' }}</span>
+                </span>
+                <UIcon
+                  v-if="!collapsed"
+                  name="i-lucide-chevrons-up-down"
+                  class="size-4 shrink-0 text-indigo-300"
+                  aria-hidden="true"
+                />
+              </UButton>
+            </UDropdownMenu>
+          </div>
         </template>
       </UDashboardSidebar>
 
