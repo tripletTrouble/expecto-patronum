@@ -7,7 +7,7 @@ describe('safeRedirect', () => {
     expect(safeRedirect(path)).toBe(path)
   })
 
-  it.each([undefined, null, '', 'https://example.com', '//example.com', 'admin/teachers'])('rejects unsafe redirect %s', (value) => {
+  it.each([undefined, null, '', 'https://example.com', '//example.com', '/\\\\evil.com', '/admin/\u0000teachers', 'admin/teachers'])('rejects unsafe redirect %s', (value) => {
     expect(safeRedirect(value)).toBe('/')
   })
 })

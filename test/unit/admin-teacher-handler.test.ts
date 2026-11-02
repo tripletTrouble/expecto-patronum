@@ -44,7 +44,7 @@ describe('admin teacher endpoints', () => {
 
     await expect(handler({} as never)).resolves.toMatchObject({ data: [] })
     expect(requireRole).toHaveBeenCalledWith({}, ['ADMIN'])
-    expect(listPendingTeachers).toHaveBeenCalledWith({ page: 1, pageSize: 20 })
+    expect(listPendingTeachers).toHaveBeenCalledWith({ page: 1, pageSize: 20, status: 'PENDING' })
   })
 
   it.each([

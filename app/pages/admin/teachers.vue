@@ -6,6 +6,7 @@ definePageMeta({ layout: 'dashboard', middleware: 'admin' })
 useHead({ title: 'Persetujuan guru - Expecto Patronum' })
 
 type TeacherStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
+type TeacherFilterStatus = TeacherStatus | 'ALL'
 type Teacher = { id: string, name: string, email: string, createdAt: string, status: TeacherStatus }
 type TeacherResponse = {
   data: Teacher[]
@@ -14,7 +15,7 @@ type TeacherResponse = {
 }
 
 const statusOptions = [
-  { label: 'Semua status', value: undefined },
+  { label: 'Semua status', value: 'ALL' },
   { label: 'Menunggu', value: 'PENDING' },
   { label: 'Disetujui', value: 'APPROVED' },
   { label: 'Ditolak', value: 'REJECTED' },
@@ -33,7 +34,7 @@ const isLoading = ref(true)
 const errorMessage = ref('')
 const actionError = ref('')
 const activeTeacherId = ref('')
-const filters = reactive({ search: '', status: undefined as TeacherStatus | undefined })
+const filters = reactive({ search: '', status: 'PENDING' as TeacherFilterStatus })
 type SelectedDateRange = { start: CalendarDate, end: CalendarDate }
 const dateRange = shallowRef<SelectedDateRange | undefined>(undefined)
 const route = useRoute()
@@ -77,7 +78,7 @@ async function loadTeachers(page = 1) {
       ...(getRangeEnd(dateRange.value)
         ? { registeredFrom: toDateQuery(dateRange.value?.start), registeredTo: toDateQuery(getRangeEnd(dateRange.value)) }
         : {}),
-      ...(filters.status ? { status: filters.status } : {}),
+      status: filters.status,
     }
     const response = await $fetch<TeacherResponse>('/api/admin/teachers/pending', { query })
     teachers.value = response.data
@@ -150,7 +151,7 @@ function scheduleFilterUpdate() {
 watch(() => route.fullPath, async () => {
   const search = queryString(route.query.search).trim().slice(0, 255)
   const rawStatus = queryString(route.query.status)
-  const status = statusOptions.some(option => option.value === rawStatus) ? rawStatus as TeacherStatus : undefined
+  const status = statusOptions.some(option => option.value === rawStatus) ? rawStatus as TeacherFilterStatus : 'PENDING'
   const start = calendarDateFromQuery(queryString(route.query.registeredFrom))
   const end = calendarDateFromQuery(queryString(route.query.registeredTo))
   const pageValue = Number(queryString(route.query.page))
@@ -172,7 +173,7 @@ watch(
 
 function clearFilters() {
   if (filterUpdateTimer) clearTimeout(filterUpdateTimer)
-  Object.assign(filters, { search: '', status: undefined })
+  Object.assign(filters, { search: '', status: 'PENDING' })
   dateRange.value = undefined
   updateRouteQuery(1)
 }

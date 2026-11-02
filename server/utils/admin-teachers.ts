@@ -9,7 +9,7 @@ export const teacherPaginationSchema = z.object({
   search: z.string().trim().max(255).optional(),
   registeredFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Tanggal tidak valid').optional(),
   registeredTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Tanggal tidak valid').optional(),
-  status: z.enum(['PENDING', 'APPROVED', 'REJECTED']).optional(),
+  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'ALL']).default('PENDING'),
 }).strict()
 
 function isValidDateOnly(value: string) {
@@ -66,7 +66,7 @@ export async function listPendingTeachers(query: TeacherListQuery) {
     : undefined
   const where = {
     role: 'TEACHER' as const,
-    ...(status ? { status } : {}),
+    ...(status !== 'ALL' ? { status } : {}),
     ...(search
       ? {
           OR: [

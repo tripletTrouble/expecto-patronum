@@ -67,6 +67,10 @@ describe('admin teacher moderation', () => {
     expect(teacherQuerySchema.safeParse({ registeredFrom: '2026-03-10', registeredTo: '2026-03-01' }).success).toBe(false)
   })
 
+  it('defaults to pending teachers when no status is supplied', () => {
+    expect(teacherQuerySchema.parse({}).status).toBe('PENDING')
+  })
+
   it('does not change a rejected teacher', async () => {
     updateMany.mockResolvedValue({ count: 0 })
     findUnique.mockResolvedValue({ ...teacher, role: 'TEACHER' as Role, status: 'REJECTED' as UserStatus })
