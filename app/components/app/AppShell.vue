@@ -20,7 +20,12 @@ const navigationItems: Array<NavigationMenuItem & { roles?: Array<'ADMIN' | 'TEA
 ]
 
 const navigation = computed<NavigationMenuItem[][]>(() => [[
-  ...navigationItems.filter(item => !item.roles || item.roles.includes(currentUser.value?.role ?? 'STUDENT')),
+  ...navigationItems
+    .filter(item => !item.roles || item.roles.includes(currentUser.value?.role ?? 'STUDENT'))
+    .map(item => ({
+      ...item,
+      active: typeof item.to === 'string' && route.path === item.to,
+    })),
 ]])
 
 const pageTitles: Record<string, string> = {
