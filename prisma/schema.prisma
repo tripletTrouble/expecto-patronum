@@ -22,6 +22,13 @@ enum UserStatus {
   REJECTED
 }
 
+enum QuestionType {
+  SINGLE
+  MULTIPLE
+  MATCHING
+  TRUE_FALSE
+}
+
 model User {
   id           String     @id @default(cuid())
   name         String
@@ -30,6 +37,10 @@ model User {
   role         Role
   status       UserStatus
   createdAt    DateTime   @default(now())
+
+  categories Category[]
+  questions  Question[]
+  media      Media[]
 }
 
 model RateLimitCounter {
@@ -37,4 +48,66 @@ model RateLimitCounter {
   count       Int
   windowStart DateTime
   updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  teacherId String
+  name      String
+  createdAt DateTime @default(now())
+
+  teacher   User       @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  questions Question[]
+
+  @@index([teacherId])
+}
+
+model Question {
+  id         String       @id @default(cuid())
+  teacherId  String
+  categoryId String?
+  type       QuestionType
+  body       String       @db.Text
+  bodyText   String       @db.Text
+  points     Decimal      @db.Decimal(10, 2)
+  deletedAt  DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  teacher  User             @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  category Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  options  QuestionOption[]
+
+  @@index([teacherId])
+  @@index([categoryId])
+  @@index([deletedAt])
+}
+
+model QuestionOption {
+  id         String   @id @default(cuid())
+  questionId String
+  text       String   @db.Text
+  side       String?
+  matchKey   String?
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+}
+
+model Media {
+  id         String   @id @default(cuid())
+  teacherId  String
+  storageKey String
+  mime       String
+  sizeBytes  Int
+  width      Int?
+  height     Int?
+  createdAt  DateTime @default(now())
+
+  teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([teacherId])
 }
