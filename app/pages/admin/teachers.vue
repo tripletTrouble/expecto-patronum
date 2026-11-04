@@ -34,6 +34,8 @@ const isLoading = ref(true)
 const errorMessage = ref('')
 const actionError = ref('')
 const activeTeacherId = ref('')
+const isRejectModalOpen = ref(false)
+const teacherPendingRejection = ref<Teacher | null>(null)
 const filters = reactive({ search: '', status: 'PENDING' as TeacherFilterStatus })
 type SelectedDateRange = { start: CalendarDate, end: CalendarDate }
 const dateRange = shallowRef<SelectedDateRange | undefined>(undefined)
@@ -189,8 +191,24 @@ function statusColor(status: TeacherStatus) {
   return status === 'PENDING' ? 'warning' : status === 'APPROVED' ? 'success' : 'error'
 }
 
+function requestTeacherRejection(teacher: Teacher) {
+  teacherPendingRejection.value = teacher
+  isRejectModalOpen.value = true
+}
+
+function cancelTeacherRejection() {
+  isRejectModalOpen.value = false
+  teacherPendingRejection.value = null
+}
+
+async function confirmTeacherRejection() {
+  const teacher = teacherPendingRejection.value
+  if (!teacher) return
+  cancelTeacherRejection()
+  await changeTeacherStatus(teacher, 'reject')
+}
+
 async function changeTeacherStatus(teacher: Teacher, status: 'approve' | 'reject') {
-  if (status === 'reject' && !window.confirm(`Tolak pendaftaran ${teacher.name}?`)) return
   activeTeacherId.value = teacher.id
   actionError.value = ''
   try {
@@ -388,13 +406,14 @@ onBeforeUnmount(() => {
               <td data-label="Tindakan">
                 <div
                   v-if="teacher.status === 'PENDING'"
-                  class="flex justify-end gap-2"
+                  class="flex justify-start gap-2"
                 >
                   <UButton
                     size="sm"
-                    color="success"
+                    color="primary"
                     :loading="activeTeacherId === teacher.id"
                     :disabled="Boolean(activeTeacherId)"
+                    class="text-white"
                     @click="changeTeacherStatus(teacher, 'approve')"
                   >
                     Setujui
@@ -402,16 +421,17 @@ onBeforeUnmount(() => {
                   <UButton
                     size="sm"
                     color="error"
-                    variant="soft"
+                    variant="solid"
+                    class="text-white"
                     :loading="activeTeacherId === teacher.id"
                     :disabled="Boolean(activeTeacherId)"
-                    @click="changeTeacherStatus(teacher, 'reject')"
+                    @click="requestTeacherRejection(teacher)"
                   >
                     Tolak
                   </UButton>
                 </div><span
                   v-else
-                  class="block text-right text-sm text-indigo-300"
+                  class="block text-sm text-indigo-300"
                 >Selesai</span>
               </td>
             </tr>
@@ -436,6 +456,34 @@ onBeforeUnmount(() => {
         {{ pagination.total }} hasil ditemukan
       </p>
     </UCard>
+    <UModal
+      v-model:open="isRejectModalOpen"
+      title="Tolak pendaftaran guru"
+      :ui="{ content: 'max-w-sm', body: 'border-0 p-0! px-4! sm:px-6! pb-4!', footer: 'gap-4! justify-end border-t-1 border-white/20 bg-slate-800', header: 'border-0 ', title: 'text-lg' }"
+      :close="false"
+      @update:open="(open) => !open && (teacherPendingRejection = null)"
+    >
+      <template #body>
+        <p class=" text-gray-600 dark:text-gray-300 text-sm">
+          Tolak pendaftaran {{ teacherPendingRejection?.name }}? Email yang telah tidak bisa digunakan untuk mendaftar ulang.
+        </p>
+      </template>
+      <template #footer>
+        <UButton
+          color="neutral"
+          variant="outline"
+          @click="cancelTeacherRejection"
+        >
+          Batal
+        </UButton>
+        <UButton
+          color="error"
+          @click="confirmTeacherRejection"
+        >
+          Ya, mengerti
+        </UButton>
+      </template>
+    </UModal>
   </section>
 </template>
 
