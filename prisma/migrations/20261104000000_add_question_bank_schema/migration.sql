@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "QuestionType" AS ENUM ('MULTIPLE_CHOICE', 'MULTIPLE_SELECT', 'MATCHING', 'TRUE_FALSE');
+CREATE TYPE "QuestionType" AS ENUM ('SINGLE', 'MULTIPLE', 'MATCHING', 'TRUE_FALSE');
 
 -- CreateTable
 CREATE TABLE "Category" (
