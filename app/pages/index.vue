@@ -41,17 +41,17 @@ useHead({
 </script>
 
 <template>
-  <main class="relative isolate min-h-dvh overflow-hidden bg-[#0d0b2b] text-white motion-reduce:[&_*]:transition-none">
+  <main class="relative isolate min-h-dvh overflow-hidden bg-[#0d0b2b] text-white motion-reduce:**:transition-none">
     <div
-      class="pointer-events-none absolute -top-88 left-[36%] size-[42rem] rounded-full bg-indigo-500/20 blur-[10px]"
+      class="pointer-events-none absolute -top-88 left-[36%] size-168 rounded-full bg-indigo-500/20 blur-[10px]"
       aria-hidden="true"
     />
     <div
-      class="pointer-events-none absolute right-[-16rem] top-[30rem] size-[32rem] rounded-full bg-cyan-400/10 blur-[10px]"
+      class="pointer-events-none absolute -right-64 top-120 size-128 rounded-full bg-cyan-400/10 blur-[10px]"
       aria-hidden="true"
     />
     <div
-      class="pointer-events-none absolute inset-0 opacity-30 [background-image:linear-gradient(rgb(255_255_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(255_255_255_/_0.035)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]"
+      class="pointer-events-none absolute inset-0 opacity-30 bg-[linear-gradient(rgb(255_255_255/0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(255_255_255/0.035)_1px,transparent_1px)] bg-size-[72px_72px] mask-[linear-gradient(to_bottom,black,transparent_82%)]"
       aria-hidden="true"
     />
 
@@ -119,7 +119,7 @@ useHead({
           <span>Ruang ujian untuk masa depanmu</span>
         </div>
 
-        <h1 class="max-w-[700px] text-[clamp(3.2rem,7vw,6.6rem)] font-semibold leading-[.98] tracking-[-.065em]">
+        <h1 class="max-w-175 text-[clamp(3.2rem,7vw,6.6rem)] font-semibold leading-[.98] tracking-[-.065em]">
           Sedikit lebih siap.
           <span class="text-cyan-300">Jauh lebih percaya diri.</span>
         </h1>
@@ -134,7 +134,7 @@ useHead({
             size="xl"
             color="primary"
             trailing-icon="i-lucide-arrow-up-right"
-            class="shadow-[0_0_2.5rem_rgb(34_211_238_/_0.2)]"
+            class="shadow-[0_0_2.5rem_rgb(34_211_238/0.2)]"
           >
             Buat akun gratis
           </UButton>
@@ -163,7 +163,7 @@ useHead({
       </div>
 
       <div
-        class="relative mx-auto grid min-h-[25rem] w-full max-w-lg place-items-center sm:min-h-[31rem]"
+        class="relative mx-auto grid min-h-100 w-full max-w-lg place-items-center sm:min-h-124"
         aria-label="Pratinjau ruang ujian"
       >
         <div
@@ -171,7 +171,7 @@ useHead({
           aria-hidden="true"
         />
         <div
-          class="absolute h-[46%] w-[94%] rotate-[35deg] rounded-full border border-rose-400/16"
+          class="absolute h-[46%] w-[94%] rotate-35 rounded-full border border-rose-400/16"
           aria-hidden="true"
         />
         <div
@@ -183,7 +183,7 @@ useHead({
           aria-hidden="true"
         />
 
-        <div class="relative z-10 w-[min(100%,29rem)] overflow-hidden rounded-3xl border border-white/15 bg-[linear-gradient(145deg,rgb(47_42_107_/_0.9),rgb(21_19_65_/_0.94))] shadow-[1rem_2rem_5rem_rgb(0_0_0_/_0.3),0_0_5rem_rgb(99_102_241_/_0.18)] rotate-1 sm:rotate-2">
+        <div class="relative z-10 w-[min(100%,29rem)] overflow-hidden rounded-3xl border border-white/15 bg-[linear-gradient(145deg,rgb(47_42_107/0.9),rgb(21_19_65/0.94))] shadow-[1rem_2rem_5rem_rgb(0_0_0/0.3),0_0_5rem_rgb(99_102_241/0.18)] rotate-1 sm:rotate-2">
           <div class="flex items-center justify-between border-b border-white/10 px-5 py-4">
             <div class="flex items-center gap-3">
               <span class="grid size-9 place-items-center rounded-xl bg-cyan-300/15 text-cyan-200"><UIcon
@@ -249,7 +249,7 @@ useHead({
           </div>
         </div>
 
-        <div class="absolute left-[-2%] top-[10%] z-20 flex items-center gap-2.5 rounded-[.9rem] border border-white/15 bg-indigo-950/85 px-3 py-2.5 text-xs shadow-[0_.8rem_2rem_rgb(0_0_0_/_0.2)] backdrop-blur-xl sm:left-[-3%]">
+        <div class="absolute left-[-2%] top-[10%] z-20 flex items-center gap-2.5 rounded-[.9rem] border border-white/15 bg-indigo-950/85 px-3 py-2.5 text-xs shadow-[0_.8rem_2rem_rgb(0_0_0/0.2)] backdrop-blur-xl sm:left-[-3%]">
           <UIcon
             name="i-lucide-medal"
             class="size-4 text-amber-300"
@@ -262,7 +262,7 @@ useHead({
             </p>
           </div>
         </div>
-        <div class="absolute bottom-[13%] right-[-2%] z-20 flex items-center gap-2.5 rounded-[.9rem] border border-white/15 bg-indigo-950/85 px-3 py-2.5 text-xs text-cyan-100 shadow-[0_.8rem_2rem_rgb(0_0_0_/_0.2)] backdrop-blur-xl">
+        <div class="absolute bottom-[13%] right-[-2%] z-20 flex items-center gap-2.5 rounded-[.9rem] border border-white/15 bg-indigo-950/85 px-3 py-2.5 text-xs text-cyan-100 shadow-[0_.8rem_2rem_rgb(0_0_0/0.2)] backdrop-blur-xl">
           <UIcon
             name="i-lucide-cloud-check"
             class="size-4 text-cyan-300"
@@ -279,7 +279,7 @@ useHead({
         <p class="flex items-center gap-2.5 text-[.7rem] font-bold uppercase tracking-[.12em] text-cyan-200">
           Dibuat untuk perjalananmu
         </p>
-        <h2 class="mt-4 max-w-[620px] text-[clamp(2.2rem,4vw,3.8rem)] font-semibold leading-[1.05] tracking-[-.055em]">
+        <h2 class="mt-4 max-w-155 text-[clamp(2.2rem,4vw,3.8rem)] font-semibold leading-[1.05] tracking-[-.055em]">
           Satu ruang. <span class="text-cyan-300">Tiga cara bertumbuh.</span>
         </h2>
       </div>
@@ -288,7 +288,7 @@ useHead({
         <UCard
           v-for="mode in learningModes"
           :key="mode.title"
-          class="min-h-56 border-white/10 bg-white/[.045] transition-transform duration-300 hover:-translate-y-1 hover:bg-white/[.075] motion-reduce:transition-none"
+          class="min-h-56 border-white/10 bg-white/4.5 transition-transform duration-300 hover:-translate-y-1 hover:bg-white/7.5 motion-reduce:transition-none"
         >
           <div
             class="grid size-10.5 place-items-center rounded-[.85rem] bg-cyan-300/12 text-cyan-200"
@@ -317,7 +317,7 @@ useHead({
         <p class="flex items-center gap-2.5 text-[.7rem] font-bold uppercase tracking-[.12em] text-cyan-200">
           Dari mulai sampai selesai
         </p>
-        <h2 class="mt-4 max-w-[620px] text-[clamp(2.2rem,4vw,3.8rem)] font-semibold leading-[1.05] tracking-[-.055em]">
+        <h2 class="mt-4 max-w-155 text-[clamp(2.2rem,4vw,3.8rem)] font-semibold leading-[1.05] tracking-[-.055em]">
           Tidak perlu <span class="text-cyan-300">menebak</span> langkah berikutnya.
         </h2>
         <p class="mt-5 max-w-md leading-7 text-indigo-100/60">
@@ -351,7 +351,7 @@ useHead({
       </div>
     </section>
 
-    <section class="relative z-10 mx-5 mb-8 overflow-hidden rounded-[2rem] border border-cyan-200/15 bg-cyan-300/8 px-6 py-14 text-center sm:mx-8 sm:px-12 lg:mx-auto lg:max-w-7xl">
+    <section class="relative z-10 mx-5 mb-8 overflow-hidden rounded-4xl border border-cyan-200/15 bg-cyan-300/8 px-6 py-14 text-center sm:mx-8 sm:px-12 lg:mx-auto lg:max-w-7xl">
       <div
         class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(103,232,249,0.14),transparent_55%)]"
         aria-hidden="true"
@@ -368,7 +368,7 @@ useHead({
           size="xl"
           color="primary"
           trailing-icon="i-lucide-arrow-right"
-          class="mt-8 shadow-[0_0_2.5rem_rgb(34_211_238_/_0.2)]"
+          class="mt-8 shadow-[0_0_2.5rem_rgb(34_211_238/0.2)]"
         >
           Mulai sekarang
         </UButton>
