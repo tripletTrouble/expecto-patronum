@@ -12,16 +12,29 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   if (!role) return
 
-  const { data, error } = await useFetch<{ role: Role }>('/api/auth/me')
+  try {
+    const user = await useRequestFetch()<{ role: Role }>('/api/auth/me')
 
-  if (error.value?.statusCode === 401) {
-    return navigateTo({
-      path: '/login',
-      query: { redirect: safeRedirect(to.fullPath) },
-    })
+    if (user.role !== role) {
+      return navigateTo({ path: '/', query: { error: 'forbidden' } })
+    }
   }
+  catch (error: unknown) {
+    const statusCode = error && typeof error === 'object' && 'statusCode' in error
+      ? (error as { statusCode?: number }).statusCode
+      : undefined
 
-  if (error.value?.statusCode === 403 || data.value?.role !== role) {
-    return navigateTo({ path: '/', query: { error: 'forbidden' } })
+    if (statusCode === 401) {
+      return navigateTo({
+        path: '/login',
+        query: { redirect: safeRedirect(to.fullPath) },
+      })
+    }
+
+    if (statusCode === 403) {
+      return navigateTo({ path: '/', query: { error: 'forbidden' } })
+    }
+
+    throw error
   }
 })
