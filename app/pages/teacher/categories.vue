@@ -100,7 +100,7 @@ await loadCategories()
       :description="actionError"
       role="alert"
     />
-    <UCard>
+    <AppCard>
       <form
         class="flex flex-col gap-3 sm:flex-row"
         @submit.prevent="addCategory"
@@ -119,7 +119,7 @@ await loadCategories()
           Tambah kategori
         </UButton>
       </form>
-    </UCard>
+    </AppCard>
 
     <UAlert
       v-if="errorMessage"
@@ -139,7 +139,7 @@ await loadCategories()
         class="h-36 rounded-xl"
       />
     </div>
-    <UCard
+    <AppCard
       v-else-if="categories.length === 0"
       class="text-center"
     >
@@ -154,12 +154,12 @@ await loadCategories()
       <p class="mt-1 text-sm text-indigo-200">
         Tambahkan kategori untuk mengelompokkan soal Anda.
       </p>
-    </UCard>
+    </AppCard>
     <div
       v-else
       class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
     >
-      <UCard
+      <AppCard
         v-for="category in categories"
         :key="category.id"
         class="flex min-w-0 flex-col"
@@ -226,7 +226,7 @@ await loadCategories()
             </UButton>
           </div>
         </template>
-      </UCard>
+      </AppCard>
     </div>
 
     <UModal

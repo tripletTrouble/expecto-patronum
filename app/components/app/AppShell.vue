@@ -44,6 +44,7 @@ const navigation = computed<NavigationMenuItem[][]>(() => [[
     .map(item => ({
       ...item,
       active: typeof item.to === 'string' && route.path === item.to,
+      class: typeof item.to === 'string' && route.path === item.to ? 'text-primary before:bg-primary/10' : undefined,
     })),
 ]])
 

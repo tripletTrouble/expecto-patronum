@@ -225,7 +225,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="teacher-page">
+  <section class="w-full">
     <UAlert
       v-if="actionError"
       class="mb-4"
@@ -236,20 +236,19 @@ onBeforeUnmount(() => {
     />
 
     <div
-      class="teacher-stats"
+      class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
       aria-live="polite"
     >
-      <UCard
+      <AppCard
         v-for="stat in stats"
         :key="stat.key"
-        class="teacher-stat"
       >
         <div class="flex items-start justify-between gap-3">
           <div>
-            <p class="teacher-stat__label">
+            <p class="m-0 text-[.78rem] text-indigo-200">
               {{ stat.label }}
             </p>
-            <p class="teacher-stat__value">
+            <p class="m-[.45rem_0_0] text-[1.85rem] font-bold text-white">
               {{ summary[stat.key] }}
             </p>
           </div>
@@ -260,10 +259,10 @@ onBeforeUnmount(() => {
             aria-hidden="true"
           />
         </div>
-      </UCard>
+      </AppCard>
     </div>
 
-    <UCard class="teacher-filters mt-5">
+    <AppCard class="mt-5">
       <form
         class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end"
         @submit.prevent
@@ -323,7 +322,7 @@ onBeforeUnmount(() => {
           </UButton>
         </div>
       </form>
-    </UCard>
+    </AppCard>
 
     <UAlert
       v-if="errorMessage"
@@ -345,9 +344,9 @@ onBeforeUnmount(() => {
       </template>
     </UAlert>
 
-    <UCard
+    <AppCard
       v-else
-      class="teacher-results mt-5"
+      class="mt-5"
     >
       <div class="mb-4 flex justify-end">
         <UIcon
@@ -359,7 +358,7 @@ onBeforeUnmount(() => {
       </div>
       <div
         v-if="!isLoading && teachers.length === 0"
-        class="teacher-empty"
+        class="grid min-h-56 place-items-center text-center text-slate-300"
       >
         Tidak ada guru yang cocok dengan filter ini.
       </div>
@@ -367,7 +366,9 @@ onBeforeUnmount(() => {
         v-else
         class="overflow-x-auto"
       >
-        <table class="teacher-table">
+        <table
+          class="w-full border-collapse bg-translucent text-[.9rem] text-indigo-100 max-sm:block [&_tbody]:max-sm:block [&_thead]:max-sm:hidden [&_tr]:max-sm:block [&_tr]:max-sm:border-b [&_tr:last-child]:max-sm:border-b-0 [&_td]:border-b [&_td]:border-white/8 [&_td]:p-4 [&_td:last-child]:border-b-0 [&_th]:border-b [&_th]:border-white/14 [&_th]:p-3 [&_th]:text-left [&_th]:text-[.7rem] [&_th]:font-bold [&_th]:uppercase [&_th]:tracking-[.08em] [&_th]:text-indigo-300 [&_tbody_tr:last-child_td]:border-b-0 max-sm:[&_td]:flex max-sm:[&_td]:justify-between max-sm:[&_td]:gap-4 max-sm:[&_td]:border-0 max-sm:[&_td]:p-[.35rem_0] max-sm:[&_td]:text-right max-sm:[&_td::before]:text-left max-sm:[&_td::before]:text-[.72rem] max-sm:[&_td::before]:font-bold max-sm:[&_td::before]:uppercase max-sm:[&_td::before]:tracking-[.05em] max-sm:[&_td::before]:text-indigo-300 max-sm:[&_td::before]:content-[attr(data-label)]"
+        >
           <thead>
             <tr>
               <th>Nama</th><th>Email</th><th>Terdaftar</th><th>Status</th><th class="text-right">
@@ -455,7 +456,7 @@ onBeforeUnmount(() => {
       >
         {{ pagination.total }} hasil ditemukan
       </p>
-    </UCard>
+    </AppCard>
     <UModal
       v-model:open="isRejectModalOpen"
       title="Tolak pendaftaran guru"
@@ -486,26 +487,3 @@ onBeforeUnmount(() => {
     </UModal>
   </section>
 </template>
-
-<style scoped>
-.teacher-page { width: 100%; }
-.teacher-stats { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: .75rem; }
-.teacher-stat, .teacher-filters, .teacher-results { background: rgb(255 255 255 / .08); border-color: rgb(255 255 255 / .16); backdrop-filter: blur(18px); box-shadow: inset 0 1px rgb(255 255 255 / .08); }
-.teacher-filters :deep(input), .teacher-filters :deep(button[role="combobox"]) { background: transparent; }
-.teacher-stat__label { margin: 0; color: #c7d2fe; font-size: .78rem; }
-.teacher-stat__value { margin: .45rem 0 0; color: white; font-size: 1.85rem; font-weight: 700; }
-.teacher-empty { display: grid; min-height: 14rem; place-items: center; color: #cbd5e1; text-align: center; }
-.teacher-table { width: 100%; border-collapse: collapse; color: #e0e7ff; font-size: .9rem; }
-.teacher-table th { padding: .75rem 1rem; color: #a5b4fc; font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-align: left; text-transform: uppercase; border-bottom: 1px solid rgb(255 255 255 / .14); }
-.teacher-table td { padding: 1rem; border-bottom: 1px solid rgb(255 255 255 / .08); }
-.teacher-table tbody tr:last-child td { border-bottom: 0; }
-@media (min-width: 640px) { .teacher-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 1024px) { .teacher-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (max-width: 639px) {
-  .teacher-table thead { display: none; }
-  .teacher-table, .teacher-table tbody, .teacher-table tr, .teacher-table td { display: block; }
-  .teacher-table tr { padding: .9rem 0; border-bottom: 1px solid rgb(255 255 255 / .12); }
-  .teacher-table td { display: flex; justify-content: space-between; gap: 1rem; padding: .35rem 0; border: 0; text-align: right; }
-  .teacher-table td::before { color: #a5b4fc; content: attr(data-label); font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-align: left; text-transform: uppercase; }
-}
-</style>
