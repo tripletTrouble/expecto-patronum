@@ -7,9 +7,22 @@ const { data: currentUser } = await useFetch<{ name: string, email: string, role
 
 const navigationItems: Array<NavigationMenuItem & { roles?: Array<'ADMIN' | 'TEACHER' | 'STUDENT'> }> = [
   {
+    label: 'Dashboard',
+    icon: 'i-lucide-layout-dashboard',
+    to: '/admin',
+    roles: ['ADMIN'],
+  },
+  {
+    label: 'Dashboard',
+    icon: 'i-lucide-layout-dashboard',
+    to: '/teacher',
+    roles: ['TEACHER'],
+  },
+  {
     label: 'Beranda',
     icon: 'i-lucide-house',
     to: '/',
+    roles: ['STUDENT'],
   },
   {
     label: 'Persetujuan guru',
@@ -36,6 +49,8 @@ const navigation = computed<NavigationMenuItem[][]>(() => [[
 
 const pageTitles: Record<string, string> = {
   '/': 'Beranda',
+  '/admin': 'Dashboard admin',
+  '/teacher': 'Dashboard guru',
   '/admin/teachers': 'Persetujuan guru',
   '/teacher/categories': 'Kategori',
 }

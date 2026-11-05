@@ -3,5 +3,7 @@ export default defineNuxtRouteMiddleware(async () => {
 
   if (!data.value) return
 
-  return navigateTo(data.value.role === 'ADMIN' ? '/admin/teachers' : '/')
+  const dashboard = data.value.role === 'ADMIN' ? '/admin' : data.value.role === 'TEACHER' ? '/teacher' : '/'
+
+  return navigateTo(dashboard)
 })

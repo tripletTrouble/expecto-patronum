@@ -24,7 +24,11 @@ async function submitLogin() {
       body: form,
     })
 
-    await navigateTo(safeRedirect(route.query.redirect))
+    const user = await $fetch<{ role: 'ADMIN' | 'TEACHER' | 'STUDENT' }>('/api/auth/me')
+    const redirect = typeof route.query.redirect === 'string' ? safeRedirect(route.query.redirect) : undefined
+    const dashboard = user.role === 'ADMIN' ? '/admin' : user.role === 'TEACHER' ? '/teacher' : '/'
+
+    await navigateTo(redirect ?? dashboard)
   }
   catch (error: unknown) {
     if (error && typeof error === 'object' && 'data' in error) {
