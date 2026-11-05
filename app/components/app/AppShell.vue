@@ -17,6 +17,12 @@ const navigationItems: Array<NavigationMenuItem & { roles?: Array<'ADMIN' | 'TEA
     to: '/admin/teachers',
     roles: ['ADMIN'],
   },
+  {
+    label: 'Kategori',
+    icon: 'i-lucide-folders',
+    to: '/teacher/categories',
+    roles: ['TEACHER'],
+  },
 ]
 
 const navigation = computed<NavigationMenuItem[][]>(() => [[
@@ -31,6 +37,7 @@ const navigation = computed<NavigationMenuItem[][]>(() => [[
 const pageTitles: Record<string, string> = {
   '/': 'Beranda',
   '/admin/teachers': 'Persetujuan guru',
+  '/teacher/categories': 'Kategori',
 }
 
 const pageTitle = computed(() => pageTitles[route.path] ?? 'Dashboard')
