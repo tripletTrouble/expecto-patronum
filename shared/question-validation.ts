@@ -25,7 +25,7 @@ const baseSanitizerOptions: SanitizeHtmlOptions = {
   allowedAttributes: {},
   allowedSchemes: [],
   allowProtocolRelative: false,
-  disallowedTagsMode: 'discard',
+  disallowedTagsMode: 'completelyDiscard',
 }
 
 export type SanitizerTarget = 'body' | 'option'
@@ -35,13 +35,23 @@ export interface SanitizerConfig {
   optionAllowedTags?: readonly string[]
 }
 
+function sanitizeContent(html: string, allowedTags: readonly string[]) {
+  const sanitized = sanitizeHtml(`<div>${html}</div>`, {
+    ...baseSanitizerOptions,
+    allowedTags: ['div', ...allowedTags],
+  })
+  return sanitized.startsWith('<div>') && sanitized.endsWith('</div>')
+    ? sanitized.slice(5, -6)
+    : sanitized
+}
+
 export function createSanitizer(config: SanitizerConfig = {}) {
   const bodyAllowedTags = [...(config.bodyAllowedTags ?? BODY_ALLOWED_TAGS)]
   const optionAllowedTags = [...(config.optionAllowedTags ?? INLINE_ALLOWED_TAGS)]
 
   return {
-    body: (html: string) => sanitizeHtml(html, { ...baseSanitizerOptions, allowedTags: bodyAllowedTags }),
-    option: (html: string) => sanitizeHtml(html, { ...baseSanitizerOptions, allowedTags: optionAllowedTags }),
+    body: (html: string) => sanitizeContent(html, bodyAllowedTags),
+    option: (html: string) => sanitizeContent(html, optionAllowedTags),
   }
 }
 
@@ -69,8 +79,12 @@ function hasText(html: string) {
 
 const richText = z.string().max(QUESTION_BODY_MAX_LENGTH, 'Teks soal terlalu panjang')
 const optionText = z.string().max(QUESTION_OPTION_MAX_LENGTH, 'Teks opsi terlalu panjang')
-const nonEmptyRichText = richText.refine(hasText, 'Isi soal wajib diisi')
-const nonEmptyOptionText = optionText.refine(hasText, 'Teks opsi wajib diisi')
+const nonEmptyRichText = richText
+  .transform(value => sanitizer.body(value))
+  .refine(hasText, 'Isi soal wajib diisi')
+const nonEmptyOptionText = optionText
+  .transform(value => sanitizer.option(value))
+  .refine(hasText, 'Teks opsi wajib diisi')
 
 const commonQuestionFields = {
   categoryId: z.string().cuid('Kategori tidak valid'),

@@ -50,10 +50,17 @@ describe('question schema', () => {
     expect(questionSchema.safeParse(input).success).toBe(true)
   })
 
-  it('rejects empty body content including empty HTML', () => {
-    for (const body of ['', '<p></p>', '<p>&nbsp;</p>', ' \n\t ']) {
+  it('rejects empty body content including empty HTML and stripped containers', () => {
+    for (const body of ['', '<p></p>', '<p>&nbsp;</p>', ' \n\t ', '<script>alert(1)</script>', '<noscript>alert(1)</noscript>', '<template>alert(1)</template>', '<plaintext>alert(1)']) {
       expect(questionSchema.safeParse(single({ body })).success).toBe(false)
     }
+  })
+
+  it('rejects options whose content is removed by sanitization', () => {
+    expect(questionSchema.safeParse(single({ options: [
+      { text: '<noscript>A</noscript>', isCorrect: true },
+      { text: 'B', isCorrect: false },
+    ] })).success).toBe(false)
   })
 
   it('rejects invalid category identifiers and client-supplied points', () => {
@@ -140,7 +147,7 @@ describe('question sanitizer', () => {
 
   it('supports adding allowlisted elements through configuration', () => {
     const configured = createSanitizer({ bodyAllowedTags: ['p', 'mark'] })
-    expect(configured.body('<mark>ditandai</mark><strong>dihapus</strong>')).toBe('<mark>ditandai</mark>dihapus')
+    expect(configured.body('<mark>ditandai</mark><strong>dihapus</strong>')).toBe('<mark>ditandai</mark>')
   })
 
   it('normalizes plain text for emptiness and duplicate checks', () => {
