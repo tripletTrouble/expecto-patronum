@@ -1,221 +1,230 @@
 <script setup lang="ts">
-definePageMeta({ layout: "dashboard" });
-useHead({ title: "Kategori - Expecto Patronum" });
+definePageMeta({ layout: 'dashboard' })
+useHead({ title: 'Kategori - Expecto Patronum' })
 
 type Category = {
-  id: string;
-  name: string;
-  createdAt: string;
-  questionCount: number;
-};
-type CategoryResponse = { data: Category[] };
+  id: string
+  name: string
+  createdAt: string
+  questionCount: number
+}
+type CategoryResponse = { data: Category[] }
 
-const categories = ref<Category[]>([]);
-const search = ref("");
-const isLoading = ref(true);
-const errorMessage = ref("");
-const actionError = ref("");
-const name = ref("");
-const isCreateModalOpen = ref(false);
-const createAgain = ref(true);
-const isSubmitting = ref(false);
-const editingId = ref<string | null>(null);
-const editingName = ref("");
-const editingNameElement = ref<HTMLElement | HTMLElement[] | null>(null);
-let searchUpdateTimer: ReturnType<typeof setTimeout> | undefined;
-const activeId = ref("");
-const deletingCategory = ref<Category | null>(null);
-const isDeleteModalOpen = ref(false);
-const dateFormatter = new Intl.DateTimeFormat("id-ID", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
+const categories = ref<Category[]>([])
+const search = ref('')
+const isLoading = ref(true)
+const errorMessage = ref('')
+const actionError = ref('')
+const name = ref('')
+const isCreateModalOpen = ref(false)
+const createAgain = ref(true)
+const isSubmitting = ref(false)
+const editingId = ref<string | null>(null)
+const editingName = ref('')
+const editingNameElement = ref<HTMLElement | HTMLElement[] | null>(null)
+let searchUpdateTimer: ReturnType<typeof setTimeout> | undefined
+const activeId = ref('')
+const deletingCategory = ref<Category | null>(null)
+const isDeleteModalOpen = ref(false)
+const dateFormatter = new Intl.DateTimeFormat('id-ID', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+})
 
 function errorMessageFrom(error: unknown, fallback: string) {
-  if (error && typeof error === "object" && "data" in error)
+  if (error && typeof error === 'object' && 'data' in error)
     return (
       (error.data as { message?: string } | undefined)?.message ?? fallback
-    );
-  return fallback;
+    )
+  return fallback
 }
 
 function formatCreatedAt(createdAt: string) {
-  return dateFormatter.format(new Date(createdAt));
+  return dateFormatter.format(new Date(createdAt))
 }
 
 async function loadCategories() {
-  isLoading.value = true;
-  errorMessage.value = "";
+  isLoading.value = true
+  errorMessage.value = ''
   try {
     categories.value = (
-      await useRequestFetch()<CategoryResponse>("/api/teacher/categories", {
+      await useRequestFetch()<CategoryResponse>('/api/teacher/categories', {
         query: { search: search.value.trim() || undefined },
       })
-    ).data;
-  } catch (error: unknown) {
+    ).data
+  }
+  catch (error: unknown) {
     errorMessage.value = errorMessageFrom(
       error,
-      "Daftar kategori belum dapat dimuat. Silakan coba lagi.",
-    );
-  } finally {
-    isLoading.value = false;
+      'Daftar kategori belum dapat dimuat. Silakan coba lagi.',
+    )
+  }
+  finally {
+    isLoading.value = false
   }
 }
 
 function submitSearch() {
-  if (searchUpdateTimer) clearTimeout(searchUpdateTimer);
-  void loadCategories();
+  if (searchUpdateTimer) clearTimeout(searchUpdateTimer)
+  void loadCategories()
 }
 
 watch(search, () => {
-  if (searchUpdateTimer) clearTimeout(searchUpdateTimer);
+  if (searchUpdateTimer) clearTimeout(searchUpdateTimer)
   searchUpdateTimer = setTimeout(() => {
-    void loadCategories();
-  }, 350);
-});
+    void loadCategories()
+  }, 350)
+})
 
 function openCreateModal() {
-  actionError.value = "";
-  name.value = "";
-  isCreateModalOpen.value = true;
+  actionError.value = ''
+  name.value = ''
+  isCreateModalOpen.value = true
 }
 
 async function addCategory() {
-  isSubmitting.value = true;
-  actionError.value = "";
+  isSubmitting.value = true
+  actionError.value = ''
   try {
-    await $fetch("/api/teacher/categories", {
-      method: "POST",
+    await $fetch('/api/teacher/categories', {
+      method: 'POST',
       body: { name: name.value },
-    });
-    name.value = "";
-    await loadCategories();
-    if (!createAgain.value) isCreateModalOpen.value = false;
-  } catch (error: unknown) {
+    })
+    name.value = ''
+    await loadCategories()
+    if (!createAgain.value) isCreateModalOpen.value = false
+  }
+  catch (error: unknown) {
     actionError.value = errorMessageFrom(
       error,
-      "Kategori belum dapat ditambahkan. Silakan coba lagi.",
-    );
-  } finally {
-    isSubmitting.value = false;
+      'Kategori belum dapat ditambahkan. Silakan coba lagi.',
+    )
+  }
+  finally {
+    isSubmitting.value = false
   }
 }
 
 function focusEditingName() {
   const element = Array.isArray(editingNameElement.value)
     ? editingNameElement.value[0]
-    : editingNameElement.value;
-  if (!element) return;
+    : editingNameElement.value
+  if (!element) return
 
-  element.focus();
-  const selection = window.getSelection();
-  if (!selection) return;
+  element.focus()
+  const selection = window.getSelection()
+  if (!selection) return
 
-  const range = document.createRange();
-  range.selectNodeContents(element);
-  selection.removeAllRanges();
-  selection.addRange(range);
+  const range = document.createRange()
+  range.selectNodeContents(element)
+  selection.removeAllRanges()
+  selection.addRange(range)
 }
 
 function startRename(category: Category) {
-  editingId.value = category.id;
-  editingName.value = category.name;
-  void nextTick(focusEditingName);
+  editingId.value = category.id
+  editingName.value = category.name
+  void nextTick(focusEditingName)
 }
 
 function handleCategoryMenuCloseAutoFocus(event: Event) {
-  event.preventDefault();
-  void nextTick(focusEditingName);
+  event.preventDefault()
+  void nextTick(focusEditingName)
 }
 
 function cancelRename() {
-  editingId.value = null;
-  editingName.value = "";
+  editingId.value = null
+  editingName.value = ''
 }
 
 function handleRenameKeydown(event: KeyboardEvent, category: Category) {
-  if (event.key === "Enter") {
-    event.preventDefault();
-    const element = event.currentTarget as HTMLElement;
-    editingName.value = element.innerText;
-    element.blur();
-    void saveRename(category);
-  } else if (event.key === "Escape") {
-    event.preventDefault();
-    cancelRename();
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    const element = event.currentTarget as HTMLElement
+    editingName.value = element.innerText
+    element.blur()
+    void saveRename(category)
+  }
+  else if (event.key === 'Escape') {
+    event.preventDefault()
+    cancelRename()
   }
 }
 
 async function saveRename(category: Category) {
-  activeId.value = category.id;
-  actionError.value = "";
+  activeId.value = category.id
+  actionError.value = ''
   try {
     await $fetch(`/api/teacher/categories/${category.id}`, {
-      method: "PATCH",
+      method: 'PATCH',
       body: { name: editingName.value },
-    });
-    cancelRename();
-    await loadCategories();
-  } catch (error: unknown) {
+    })
+    cancelRename()
+    await loadCategories()
+  }
+  catch (error: unknown) {
     actionError.value = errorMessageFrom(
       error,
-      "Nama kategori belum dapat diubah. Silakan coba lagi.",
-    );
-  } finally {
-    activeId.value = "";
+      'Nama kategori belum dapat diubah. Silakan coba lagi.',
+    )
+  }
+  finally {
+    activeId.value = ''
   }
 }
 
 function requestDelete(category: Category) {
-  deletingCategory.value = category;
-  isDeleteModalOpen.value = true;
+  deletingCategory.value = category
+  isDeleteModalOpen.value = true
 }
 
 function categoryMenuItems(category: Category) {
   return [
     [
       {
-        label: "Ubah nama",
-        icon: "i-lucide-pencil",
+        label: 'Ubah nama',
+        icon: 'i-lucide-pencil',
         onSelect: () => startRename(category),
       },
       {
-        label: "Hapus",
-        icon: "i-lucide-trash-2",
-        color: "error" as const,
+        label: 'Hapus',
+        icon: 'i-lucide-trash-2',
+        color: 'error' as const,
         onSelect: () => requestDelete(category),
       },
     ],
-  ];
+  ]
 }
 
 function cancelDelete() {
-  isDeleteModalOpen.value = false;
-  deletingCategory.value = null;
+  isDeleteModalOpen.value = false
+  deletingCategory.value = null
 }
 
 async function confirmDelete() {
-  const category = deletingCategory.value;
-  if (!category) return;
-  cancelDelete();
-  activeId.value = category.id;
-  actionError.value = "";
+  const category = deletingCategory.value
+  if (!category) return
+  cancelDelete()
+  activeId.value = category.id
+  actionError.value = ''
   try {
     await $fetch(`/api/teacher/categories/${category.id}`, {
-      method: "DELETE",
-    });
-    await loadCategories();
-  } catch (error: unknown) {
+      method: 'DELETE',
+    })
+    await loadCategories()
+  }
+  catch (error: unknown) {
     actionError.value = errorMessageFrom(
       error,
-      "Kategori belum dapat dihapus. Silakan coba lagi.",
-    );
-  } finally {
-    activeId.value = "";
+      'Kategori belum dapat dihapus. Silakan coba lagi.',
+    )
+  }
+  finally {
+    activeId.value = ''
   }
 }
 
-await loadCategories();
+await loadCategories()
 </script>
 
 <template>
@@ -230,7 +239,10 @@ await loadCategories();
 
     <AppCard>
       <div class="flex justify-between gap-5">
-        <form class="flex w-1/2 gap-2" @submit.prevent="submitSearch">
+        <form
+          class="flex w-1/2 gap-2"
+          @submit.prevent="submitSearch"
+        >
           <UInput
             v-model="search"
             class="flex-1"
@@ -238,7 +250,12 @@ await loadCategories();
             aria-label="Cari kategori berdasarkan nama"
           />
         </form>
-        <UButton icon="i-lucide-plus" @click="openCreateModal"> Buat </UButton>
+        <UButton
+          icon="i-lucide-plus"
+          @click="openCreateModal"
+        >
+          Buat
+        </UButton>
       </div>
     </AppCard>
 
@@ -260,7 +277,10 @@ await loadCategories();
         class="h-36 rounded-xl bg-translucent"
       />
     </div>
-    <AppCard v-else-if="categories.length === 0" class="text-center">
+    <AppCard
+      v-else-if="categories.length === 0"
+      class="text-center"
+    >
       <UIcon
         name="i-lucide-folder-open"
         class="mx-auto mb-3 size-8 text-indigo-200"
@@ -277,7 +297,10 @@ await loadCategories();
         }}
       </p>
     </AppCard>
-    <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div
+      v-else
+      class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4"
+    >
       <AppCard
         v-for="category in categories"
         :key="category.id"
@@ -299,7 +322,10 @@ await loadCategories();
             >
               {{ category.name }}
             </h2>
-            <div v-if="activeId === category.id" class="flex items-center">
+            <div
+              v-if="activeId === category.id"
+              class="flex items-center"
+            >
               <small class="text-xs">Menyimpan data</small>
               <UIcon
                 name="i-lucide-loader-circle"
@@ -344,7 +370,11 @@ await loadCategories();
       </AppCard>
     </div>
 
-    <UModal v-model:open="isCreateModalOpen" title="Buat Kategori">
+    <UModal
+      v-model:open="isCreateModalOpen"
+      title="Buat Kategori"
+      :ui="{ content: 'bg-translucent', header: 'border-0', body: 'border-0' }"
+    >
       <template #body>
         <UAlert
           v-if="actionError"
@@ -354,7 +384,11 @@ await loadCategories();
           :description="actionError"
           role="alert"
         />
-        <UFormField label="Nama kategori" name="category-name" required>
+        <UFormField
+          label="Nama kategori"
+          name="category-name"
+          required
+        >
           <UInput
             v-model="name"
             name="category-name"
@@ -366,7 +400,10 @@ await loadCategories();
       </template>
       <template #footer>
         <div class="flex w-full items-center justify-between gap-4">
-          <UCheckbox v-model="createAgain" label="Buat lagi" />
+          <UCheckbox
+            v-model="createAgain"
+            label="Buat lagi"
+          />
           <UButton
             :loading="isSubmitting"
             :disabled="!name.trim()"
@@ -378,7 +415,10 @@ await loadCategories();
       </template>
     </UModal>
 
-    <UModal v-model:open="isDeleteModalOpen" title="Hapus kategori">
+    <UModal
+      v-model:open="isDeleteModalOpen"
+      title="Hapus kategori"
+    >
       <template #body>
         <p class="text-sm text-gray-600 dark:text-gray-300">
           Yakin ingin menghapus kategori “{{ deletingCategory?.name }}”? Soal
@@ -386,10 +426,19 @@ await loadCategories();
         </p>
       </template>
       <template #footer>
-        <UButton color="neutral" variant="ghost" @click="cancelDelete">
+        <UButton
+          color="neutral"
+          variant="ghost"
+          @click="cancelDelete"
+        >
           Batal
         </UButton>
-        <UButton color="error" @click="confirmDelete"> Hapus kategori </UButton>
+        <UButton
+          color="error"
+          @click="confirmDelete"
+        >
+          Hapus kategori
+        </UButton>
       </template>
     </UModal>
   </section>
