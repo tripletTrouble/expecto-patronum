@@ -2,73 +2,200 @@
 definePageMeta({ layout: 'dashboard' })
 useHead({ title: 'Kategori - Expecto Patronum' })
 
-type Category = { id: string, name: string, questionCount: number }
+type Category = {
+  id: string
+  name: string
+  createdAt: string
+  questionCount: number
+}
 type CategoryResponse = { data: Category[] }
 
 const categories = ref<Category[]>([])
+const search = ref('')
 const isLoading = ref(true)
 const errorMessage = ref('')
 const actionError = ref('')
 const name = ref('')
+const isCreateModalOpen = ref(false)
+const createAgain = ref(true)
 const isSubmitting = ref(false)
 const editingId = ref<string | null>(null)
 const editingName = ref('')
+const editingNameElement = ref<HTMLElement | HTMLElement[] | null>(null)
+let searchUpdateTimer: ReturnType<typeof setTimeout> | undefined
 const activeId = ref('')
 const deletingCategory = ref<Category | null>(null)
 const isDeleteModalOpen = ref(false)
+const dateFormatter = new Intl.DateTimeFormat('id-ID', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+})
 
 function errorMessageFrom(error: unknown, fallback: string) {
-  if (error && typeof error === 'object' && 'data' in error) return (error.data as { message?: string } | undefined)?.message ?? fallback
+  if (error && typeof error === 'object' && 'data' in error)
+    return (
+      (error.data as { message?: string } | undefined)?.message ?? fallback
+    )
   return fallback
+}
+
+function formatCreatedAt(createdAt: string) {
+  return dateFormatter.format(new Date(createdAt))
 }
 
 async function loadCategories() {
   isLoading.value = true
   errorMessage.value = ''
   try {
-    categories.value = (await $fetch<CategoryResponse>('/api/teacher/categories')).data
+    categories.value = (
+      await useRequestFetch()<CategoryResponse>('/api/teacher/categories', {
+        query: { search: search.value.trim() || undefined },
+      })
+    ).data
   }
-  catch (error: unknown) { errorMessage.value = errorMessageFrom(error, 'Daftar kategori belum dapat dimuat. Silakan coba lagi.') }
-  finally { isLoading.value = false }
+  catch (error: unknown) {
+    errorMessage.value = errorMessageFrom(
+      error,
+      'Daftar kategori belum dapat dimuat. Silakan coba lagi.',
+    )
+  }
+  finally {
+    isLoading.value = false
+  }
+}
+
+function submitSearch() {
+  if (searchUpdateTimer) clearTimeout(searchUpdateTimer)
+  void loadCategories()
+}
+
+watch(search, () => {
+  if (searchUpdateTimer) clearTimeout(searchUpdateTimer)
+  searchUpdateTimer = setTimeout(() => {
+    void loadCategories()
+  }, 350)
+})
+
+function openCreateModal() {
+  actionError.value = ''
+  name.value = ''
+  isCreateModalOpen.value = true
 }
 
 async function addCategory() {
   isSubmitting.value = true
   actionError.value = ''
   try {
-    await $fetch('/api/teacher/categories', { method: 'POST', body: { name: name.value } })
+    await $fetch('/api/teacher/categories', {
+      method: 'POST',
+      body: { name: name.value },
+    })
     name.value = ''
     await loadCategories()
+    if (!createAgain.value) isCreateModalOpen.value = false
   }
-  catch (error: unknown) { actionError.value = errorMessageFrom(error, 'Kategori belum dapat ditambahkan. Silakan coba lagi.') }
-  finally { isSubmitting.value = false }
+  catch (error: unknown) {
+    actionError.value = errorMessageFrom(
+      error,
+      'Kategori belum dapat ditambahkan. Silakan coba lagi.',
+    )
+  }
+  finally {
+    isSubmitting.value = false
+  }
+}
+
+function focusEditingName() {
+  const element = Array.isArray(editingNameElement.value)
+    ? editingNameElement.value[0]
+    : editingNameElement.value
+  if (!element) return
+
+  element.focus()
+  const selection = window.getSelection()
+  if (!selection) return
+
+  const range = document.createRange()
+  range.selectNodeContents(element)
+  selection.removeAllRanges()
+  selection.addRange(range)
 }
 
 function startRename(category: Category) {
   editingId.value = category.id
   editingName.value = category.name
+  void nextTick(focusEditingName)
 }
+
+function handleCategoryMenuCloseAutoFocus(event: Event) {
+  event.preventDefault()
+  void nextTick(focusEditingName)
+}
+
 function cancelRename() {
   editingId.value = null
   editingName.value = ''
+}
+
+function handleRenameKeydown(event: KeyboardEvent, category: Category) {
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    const element = event.currentTarget as HTMLElement
+    editingName.value = element.innerText
+    element.blur()
+    void saveRename(category)
+  }
+  else if (event.key === 'Escape') {
+    event.preventDefault()
+    cancelRename()
+  }
 }
 
 async function saveRename(category: Category) {
   activeId.value = category.id
   actionError.value = ''
   try {
-    await $fetch(`/api/teacher/categories/${category.id}`, { method: 'PATCH', body: { name: editingName.value } })
+    await $fetch(`/api/teacher/categories/${category.id}`, {
+      method: 'PATCH',
+      body: { name: editingName.value },
+    })
     cancelRename()
     await loadCategories()
   }
-  catch (error: unknown) { actionError.value = errorMessageFrom(error, 'Nama kategori belum dapat diubah. Silakan coba lagi.') }
-  finally { activeId.value = '' }
+  catch (error: unknown) {
+    actionError.value = errorMessageFrom(
+      error,
+      'Nama kategori belum dapat diubah. Silakan coba lagi.',
+    )
+  }
+  finally {
+    activeId.value = ''
+  }
 }
 
 function requestDelete(category: Category) {
   deletingCategory.value = category
   isDeleteModalOpen.value = true
 }
+
+function categoryMenuItems(category: Category) {
+  return [
+    [
+      {
+        label: 'Ubah nama',
+        icon: 'i-lucide-pencil',
+        onSelect: () => startRename(category),
+      },
+      {
+        label: 'Hapus',
+        icon: 'i-lucide-trash-2',
+        color: 'error' as const,
+        onSelect: () => requestDelete(category),
+      },
+    ],
+  ]
+}
+
 function cancelDelete() {
   isDeleteModalOpen.value = false
   deletingCategory.value = null
@@ -81,11 +208,20 @@ async function confirmDelete() {
   activeId.value = category.id
   actionError.value = ''
   try {
-    await $fetch(`/api/teacher/categories/${category.id}`, { method: 'DELETE' })
+    await $fetch(`/api/teacher/categories/${category.id}`, {
+      method: 'DELETE',
+    })
     await loadCategories()
   }
-  catch (error: unknown) { actionError.value = errorMessageFrom(error, 'Kategori belum dapat dihapus. Silakan coba lagi.') }
-  finally { activeId.value = '' }
+  catch (error: unknown) {
+    actionError.value = errorMessageFrom(
+      error,
+      'Kategori belum dapat dihapus. Silakan coba lagi.',
+    )
+  }
+  finally {
+    activeId.value = ''
+  }
 }
 
 await loadCategories()
@@ -94,32 +230,34 @@ await loadCategories()
 <template>
   <section class="space-y-5">
     <UAlert
-      v-if="actionError"
+      v-if="actionError && !isCreateModalOpen"
       color="error"
       variant="soft"
       :description="actionError"
       role="alert"
     />
-    <UCard>
-      <form
-        class="flex flex-col gap-3 sm:flex-row"
-        @submit.prevent="addCategory"
-      >
-        <UInput
-          v-model="name"
-          class="min-w-0 flex-1"
-          placeholder="Nama kategori baru"
-          aria-label="Nama kategori baru"
-        />
-        <UButton
-          type="submit"
-          icon="i-lucide-plus"
-          :loading="isSubmitting"
+
+    <AppCard>
+      <div class="flex justify-between gap-5">
+        <form
+          class="flex w-1/2 gap-2"
+          @submit.prevent="submitSearch"
         >
-          Tambah kategori
+          <UInput
+            v-model="search"
+            class="flex-1"
+            placeholder="Cari kategori berdasarkan nama"
+            aria-label="Cari kategori berdasarkan nama"
+          />
+        </form>
+        <UButton
+          icon="i-lucide-plus"
+          @click="openCreateModal"
+        >
+          Buat
         </UButton>
-      </form>
-    </UCard>
+      </div>
+    </AppCard>
 
     <UAlert
       v-if="errorMessage"
@@ -130,16 +268,16 @@ await loadCategories()
     />
     <div
       v-if="isLoading"
-      class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4"
       aria-label="Memuat kategori"
     >
       <USkeleton
         v-for="index in 4"
         :key="index"
-        class="h-36 rounded-xl"
+        class="h-36 rounded-xl bg-translucent"
       />
     </div>
-    <UCard
+    <AppCard
       v-else-if="categories.length === 0"
       class="text-center"
     >
@@ -149,85 +287,133 @@ await loadCategories()
         aria-hidden="true"
       />
       <p class="font-medium text-white">
-        Belum ada kategori
+        {{ search.trim() ? "Kategori tidak ditemukan" : "Belum ada kategori" }}
       </p>
       <p class="mt-1 text-sm text-indigo-200">
-        Tambahkan kategori untuk mengelompokkan soal Anda.
+        {{
+          search.trim()
+            ? "Coba gunakan kata kunci lain."
+            : "Klik tombol Buat untuk menambahkan kategori pertama."
+        }}
       </p>
-    </UCard>
+    </AppCard>
     <div
       v-else
-      class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4"
     >
-      <UCard
+      <AppCard
         v-for="category in categories"
         :key="category.id"
-        class="flex min-w-0 flex-col"
+        class="flex w-full min-w-0 flex-col"
       >
-        <template v-if="editingId === category.id">
-          <form
-            class="flex min-w-0 flex-1 flex-col gap-3"
-            @submit.prevent="saveRename(category)"
-          >
-            <UInput
-              v-model="editingName"
-              class="min-w-0"
+        <div class="grid grid-cols-1 space-y-2">
+          <div class="flex min-w-0 items-start justify-between gap-3">
+            <h2
+              v-if="editingId === category.id"
+              ref="editingNameElement"
+              contenteditable="true"
+              class="min-w-0 flex-1 rounded-md outline-none focus:ring-2 focus:ring-primary"
               aria-label="Nama kategori"
+              role="textbox"
+              tabindex="0"
               autofocus
-            />
-            <div class="mt-auto flex gap-2">
-              <UButton
-                type="submit"
-                size="sm"
-                :loading="activeId === category.id"
-              >
-                Simpan
-              </UButton>
-              <UButton
-                type="button"
-                size="sm"
-                color="neutral"
-                variant="ghost"
-                @click="cancelRename"
-              >
-                Batal
-              </UButton>
-            </div>
-          </form>
-        </template>
-        <template v-else>
-          <div class="min-w-0 flex-1">
-            <h2 class="break-words font-semibold text-white">
+              :aria-busy="activeId === category.id"
+              @keydown="handleRenameKeydown($event, category)"
+            >
               {{ category.name }}
             </h2>
-            <p class="mt-2 text-sm text-indigo-200">
-              {{ category.questionCount }} soal aktif
-            </p>
-          </div>
-          <div class="mt-5 flex flex-wrap gap-2">
-            <UButton
-              size="sm"
-              color="neutral"
-              variant="ghost"
-              icon="i-lucide-pencil"
-              @click="startRename(category)"
+            <div
+              v-if="activeId === category.id"
+              class="flex items-center"
             >
-              Ubah nama
-            </UButton>
-            <UButton
-              size="sm"
-              color="error"
-              variant="ghost"
-              icon="i-lucide-trash-2"
-              :loading="activeId === category.id"
-              @click="requestDelete(category)"
+              <small class="text-xs">Menyimpan data</small>
+              <UIcon
+                name="i-lucide-loader-circle"
+                class="mt-1 size-5 shrink-0 animate-spin text-indigo-200"
+                aria-label="Menyimpan nama kategori"
+              />
+            </div>
+            <h2
+              v-if="editingId !== category.id"
+              class="line-clamp-2 min-w-0 flex-1 font-semibold text-white"
+              :title="category.name"
             >
-              Hapus
-            </UButton>
+              {{ category.name }}
+            </h2>
+            <UDropdownMenu
+              :items="categoryMenuItems(category)"
+              :content="{
+                align: 'end',
+                onCloseAutoFocus: handleCategoryMenuCloseAutoFocus,
+              }"
+            >
+              <UButton
+                color="neutral"
+                variant="ghost"
+                icon="i-lucide-ellipsis-vertical"
+                aria-label="Aksi kategori"
+                :ui="{ leadingIcon: 'size-5' }"
+              />
+            </UDropdownMenu>
           </div>
-        </template>
-      </UCard>
+          <div class="mt-auto flex items-center gap-2 text-sm text-indigo-200">
+            <span>{{ category.questionCount }} soal aktif</span>
+            <span aria-hidden="true">·</span>
+            <time
+              :datetime="category.createdAt"
+              :title="formatCreatedAt(category.createdAt)"
+            >
+              {{ formatCreatedAt(category.createdAt) }}
+            </time>
+          </div>
+        </div>
+      </AppCard>
     </div>
+
+    <UModal
+      v-model:open="isCreateModalOpen"
+      title="Buat Kategori"
+      :ui="{ content: 'bg-translucent', header: 'border-0', body: 'border-0' }"
+    >
+      <template #body>
+        <UAlert
+          v-if="actionError"
+          class="mb-4"
+          color="error"
+          variant="soft"
+          :description="actionError"
+          role="alert"
+        />
+        <UFormField
+          label="Nama kategori"
+          name="category-name"
+          required
+        >
+          <UInput
+            v-model="name"
+            name="category-name"
+            placeholder="Contoh: Matematika Kelas 10"
+            autofocus
+            class="w-full"
+          />
+        </UFormField>
+      </template>
+      <template #footer>
+        <div class="flex w-full items-center justify-between gap-4">
+          <UCheckbox
+            v-model="createAgain"
+            label="Buat lagi"
+          />
+          <UButton
+            :loading="isSubmitting"
+            :disabled="!name.trim()"
+            @click="addCategory"
+          >
+            Buat
+          </UButton>
+        </div>
+      </template>
+    </UModal>
 
     <UModal
       v-model:open="isDeleteModalOpen"
@@ -235,7 +421,8 @@ await loadCategories()
     >
       <template #body>
         <p class="text-sm text-gray-600 dark:text-gray-300">
-          Yakin ingin menghapus kategori “{{ deletingCategory?.name }}”? Soal yang sudah dihapus akan dilepas dari kategori.
+          Yakin ingin menghapus kategori “{{ deletingCategory?.name }}”? Soal
+          yang sudah dihapus akan dilepas dari kategori.
         </p>
       </template>
       <template #footer>
