@@ -6,6 +6,7 @@ type Category = { id: string, name: string, createdAt: string, questionCount: nu
 type CategoryResponse = { data: Category[] }
 
 const categories = ref<Category[]>([])
+const search = ref('')
 const isLoading = ref(true)
 const errorMessage = ref('')
 const actionError = ref('')
@@ -15,6 +16,7 @@ const createAgain = ref(true)
 const isSubmitting = ref(false)
 const editingId = ref<string | null>(null)
 const editingName = ref('')
+const editingNameElement = ref<HTMLElement | HTMLElement[] | null>(null)
 const activeId = ref('')
 const deletingCategory = ref<Category | null>(null)
 const isDeleteModalOpen = ref(false)
@@ -33,7 +35,9 @@ async function loadCategories() {
   isLoading.value = true
   errorMessage.value = ''
   try {
-    categories.value = (await useRequestFetch()<CategoryResponse>('/api/teacher/categories')).data
+    categories.value = (await useRequestFetch()<CategoryResponse>('/api/teacher/categories', {
+      query: { search: search.value.trim() || undefined },
+    })).data
   }
   catch (error: unknown) { errorMessage.value = errorMessageFrom(error, 'Daftar kategori belum dapat dimuat. Silakan coba lagi.') }
   finally { isLoading.value = false }
@@ -58,14 +62,48 @@ async function addCategory() {
   finally { isSubmitting.value = false }
 }
 
+function focusEditingName() {
+  const element = Array.isArray(editingNameElement.value)
+    ? editingNameElement.value[0]
+    : editingNameElement.value
+  if (!element) return
+
+  element.focus()
+  const selection = window.getSelection()
+  if (!selection) return
+
+  const range = document.createRange()
+  range.selectNodeContents(element)
+  selection.removeAllRanges()
+  selection.addRange(range)
+}
+
 function startRename(category: Category) {
   editingId.value = category.id
   editingName.value = category.name
+  void nextTick(focusEditingName)
+}
+
+function handleCategoryMenuCloseAutoFocus(event: Event) {
+  event.preventDefault()
+  void nextTick(focusEditingName)
 }
 
 function cancelRename() {
   editingId.value = null
   editingName.value = ''
+}
+
+function handleRenameKeydown(event: KeyboardEvent, category: Category) {
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    editingName.value = (event.currentTarget as HTMLElement).innerText
+    void saveRename(category)
+  }
+  else if (event.key === 'Escape') {
+    event.preventDefault()
+    cancelRename()
+  }
 }
 
 async function saveRename(category: Category) {
@@ -134,20 +172,31 @@ await loadCategories()
     />
 
     <AppCard>
-      <UPageHeader
-        title="Kategori Soal"
-        description="Kelola kategori soal berdasarkan bab atau kelas agar lebih mudah dicari saat membuat ujian"
-        :ui="{ root: 'p-0', wrapper: 'items-start' }"
-      >
-        <template #links>
+      <div class="flex justify-between gap-5">
+        <form
+          class="flex w-1/2 gap-2"
+          @submit.prevent="loadCategories"
+        >
+          <UInput
+            v-model="search"
+            class="flex-1"
+            placeholder="Cari kategori berdasarkan nama"
+            aria-label="Cari kategori berdasarkan nama"
+          />
           <UButton
-            icon="i-lucide-plus"
-            @click="openCreateModal"
+            type="submit"
+            icon="i-lucide-search"
           >
-            Buat
+            Cari
           </UButton>
-        </template>
-      </UPageHeader>
+        </form>
+        <UButton
+          icon="i-lucide-plus"
+          @click="openCreateModal"
+        >
+          Buat
+        </UButton>
+      </div>
     </AppCard>
 
     <UAlert
@@ -165,7 +214,7 @@ await loadCategories()
       <USkeleton
         v-for="index in 4"
         :key="index"
-        class="h-36 rounded-xl"
+        class="h-36 rounded-xl bg-translucent"
       />
     </div>
     <AppCard
@@ -178,10 +227,10 @@ await loadCategories()
         aria-hidden="true"
       />
       <p class="font-medium text-white">
-        Belum ada kategori
+        {{ search.trim() ? 'Kategori tidak ditemukan' : 'Belum ada kategori' }}
       </p>
       <p class="mt-1 text-sm text-indigo-200">
-        Klik tombol Buat untuk menambahkan kategori pertama.
+        {{ search.trim() ? 'Coba gunakan kata kunci lain.' : 'Klik tombol Buat untuk menambahkan kategori pertama.' }}
       </p>
     </AppCard>
     <div
@@ -196,6 +245,20 @@ await loadCategories()
         <template #header>
           <div class="flex min-w-0 items-start justify-between gap-3">
             <h2
+              v-if="editingId === category.id"
+              ref="editingNameElement"
+              contenteditable="true"
+              class="min-w-0 flex-1 rounded-md outline-none focus:ring-2 focus:ring-primary"
+              aria-label="Nama kategori"
+              role="textbox"
+              tabindex="0"
+              autofocus
+              @keydown="handleRenameKeydown($event, category)"
+            >
+              {{ category.name }}
+            </h2>
+            <h2
+              v-else
               class="line-clamp-2 min-w-0 flex-1 font-semibold text-white"
               :title="category.name"
             >
@@ -203,7 +266,7 @@ await loadCategories()
             </h2>
             <UDropdownMenu
               :items="categoryMenuItems(category)"
-              :content="{ align: 'end' }"
+              :content="{ align: 'end', onCloseAutoFocus: handleCategoryMenuCloseAutoFocus }"
             >
               <UButton
                 color="neutral"
@@ -216,50 +279,16 @@ await loadCategories()
           </div>
         </template>
 
-        <form
-          v-if="editingId === category.id"
-          class="flex min-w-0 flex-1 flex-col gap-3"
-          @submit.prevent="saveRename(category)"
-        >
-          <UFormField label="Nama kategori">
-            <UInput
-              v-model="editingName"
-              class="min-w-0"
-              aria-label="Nama kategori"
-              autofocus
-            />
-          </UFormField>
-          <div class="mt-auto flex gap-2">
-            <UButton
-              type="submit"
-              size="sm"
-              :loading="activeId === category.id"
-            >
-              Simpan
-            </UButton>
-            <UButton
-              type="button"
-              size="sm"
-              color="neutral"
-              variant="ghost"
-              @click="cancelRename"
-            >
-              Batal
-            </UButton>
-          </div>
-        </form>
-        <template v-else>
-          <div class="mt-auto flex items-center gap-2 text-sm text-indigo-200">
-            <span>{{ category.questionCount }} soal aktif</span>
-            <span aria-hidden="true">·</span>
-            <time
-              :datetime="category.createdAt"
-              :title="formatCreatedAt(category.createdAt)"
-            >
-              {{ formatCreatedAt(category.createdAt) }}
-            </time>
-          </div>
-        </template>
+        <div class="mt-auto flex items-center gap-2 text-sm text-indigo-200">
+          <span>{{ category.questionCount }} soal aktif</span>
+          <span aria-hidden="true">·</span>
+          <time
+            :datetime="category.createdAt"
+            :title="formatCreatedAt(category.createdAt)"
+          >
+            {{ formatCreatedAt(category.createdAt) }}
+          </time>
+        </div>
       </AppCard>
     </div>
 

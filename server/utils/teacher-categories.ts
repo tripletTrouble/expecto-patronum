@@ -9,6 +9,10 @@ export const categoryBodySchema = z.object({
   name: z.string().trim().min(1, 'Nama kategori wajib diisi').max(100, 'Nama kategori terlalu panjang'),
 }).strict()
 
+export const categoryQuerySchema = z.object({
+  search: z.string().trim().max(100, 'Pencarian kategori terlalu panjang').optional(),
+}).strict()
+
 const categorySelect = {
   id: true,
   name: true,
@@ -34,9 +38,14 @@ function isUniqueConstraintError(error: unknown) {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002'
 }
 
-export async function listTeacherCategories(teacherId: string) {
+type CategoryQuery = z.infer<typeof categoryQuerySchema>
+
+export async function listTeacherCategories(teacherId: string, query: CategoryQuery = {}) {
   const categories = await prisma.category.findMany({
-    where: { teacherId },
+    where: {
+      teacherId,
+      ...(query.search ? { name: { contains: query.search, mode: 'insensitive' as const } } : {}),
+    },
     orderBy: { name: 'asc' },
     select: categorySelect,
   })
