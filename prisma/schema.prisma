@@ -69,6 +69,7 @@ model Question {
   type       QuestionType
   body       String       @db.Text
   bodyText   String       @db.Text
+  explanation String?     @db.Text
   points     Decimal      @db.Decimal(10, 2)
   deletedAt  DateTime?
   createdAt  DateTime     @default(now())
@@ -87,6 +88,7 @@ model QuestionOption {
   id         String   @id @default(cuid())
   questionId String
   text       String   @db.Text
+  isCorrect  Boolean  @default(false)
   side       String?
   matchKey   String?
   sortOrder  Int      @default(0)
