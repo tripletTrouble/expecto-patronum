@@ -49,6 +49,7 @@ import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import Document from '@tiptap/extension-document'
 import Text from '@tiptap/extension-text'
+import Paragraph from '@tiptap/extension-paragraph'
 import Bold from '@tiptap/extension-bold'
 import Italic from '@tiptap/extension-italic'
 import { computed, watch } from 'vue'
@@ -70,7 +71,7 @@ const editor = useEditor({
 
   content: sanitizeEditorContent(props.modelValue, 'option'),
   editable: !props.disabled,
-  extensions: [Document, Text, Bold, Italic, Underline, Subscript, Superscript],
+  extensions: [Document, Paragraph, Text, Bold, Italic, Underline, Subscript, Superscript],
   editorProps: {
     attributes: {
       'class': 'rich-text-editor__prose rich-text-editor__prose--compact',

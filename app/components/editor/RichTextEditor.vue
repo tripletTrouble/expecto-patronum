@@ -71,11 +71,18 @@
 </template>
 
 <script setup lang="ts">
-import StarterKit from '@tiptap/starter-kit'
 import { EditorContent, useEditor } from '@tiptap/vue-3'
+import Document from '@tiptap/extension-document'
+import Paragraph from '@tiptap/extension-paragraph'
+import Text from '@tiptap/extension-text'
+import Bold from '@tiptap/extension-bold'
+import Italic from '@tiptap/extension-italic'
 import Underline from '@tiptap/extension-underline'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
+import BulletList from '@tiptap/extension-bullet-list'
+import OrderedList from '@tiptap/extension-ordered-list'
+import ListItem from '@tiptap/extension-list-item'
 import { computed, watch } from 'vue'
 
 import { sanitizeEditorContent, sanitizePastedContent } from './rich-text-editor-utils'
@@ -96,19 +103,17 @@ const editor = useEditor({
   content: sanitizeEditorContent(props.modelValue, 'body'),
   editable: !props.disabled,
   extensions: [
-    StarterKit.configure({
-      blockquote: false,
-      code: false,
-      codeBlock: false,
-      dropcursor: false,
-      gapcursor: false,
-      heading: false,
-      horizontalRule: false,
-      strike: false,
-    }),
+    Document,
+    Paragraph,
+    Text,
+    Bold,
+    Italic,
     Underline,
     Subscript,
     Superscript,
+    BulletList,
+    OrderedList,
+    ListItem,
   ],
   editorProps: {
     attributes: {
