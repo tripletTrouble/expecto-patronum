@@ -4,7 +4,7 @@ import { z } from 'zod'
 export const QUESTION_BODY_MAX_LENGTH = 50_000
 export const QUESTION_OPTION_MAX_LENGTH = 10_000
 
-const BODY_ALLOWED_TAGS = [
+export const BODY_ALLOWED_TAGS = [
   'p',
   'br',
   'strong',
@@ -19,7 +19,7 @@ const BODY_ALLOWED_TAGS = [
   'li',
 ] as const
 
-const INLINE_ALLOWED_TAGS = ['strong', 'b', 'em', 'i', 'u', 'sub', 'sup'] as const
+export const INLINE_ALLOWED_TAGS = ['strong', 'b', 'em', 'i', 'u', 'sub', 'sup'] as const
 
 const baseSanitizerOptions: SanitizeHtmlOptions = {
   allowedAttributes: {},
