@@ -34,6 +34,11 @@ describe('rich text editor sanitization', () => {
     expect(result).not.toMatch(/class|style|table|script|alert/i)
   })
 
+  it('canonicalizes paragraph-backed compact documents for model comparisons', () => {
+    expect(sanitizeEditorContent('<p><strong>A</strong></p>', 'option')).toBe('<strong>A</strong>')
+    expect(sanitizeEditorContent('<strong>A</strong>', 'option')).toBe('<strong>A</strong>')
+  })
+
   it('removes block elements from compact pasted content', () => {
     const result = sanitizePastedContent('<p><strong>A</strong></p><div>B</div><ul><li>C</li></ul>', 'option')
 

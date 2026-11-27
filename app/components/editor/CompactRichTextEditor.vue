@@ -92,7 +92,8 @@ watch(() => props.modelValue, (value) => {
   if (!currentEditor) return
 
   const content = sanitizeEditorContent(value, 'option')
-  if (content !== currentEditor.getHTML()) currentEditor.commands.setContent(content, { emitUpdate: false })
+  const currentContent = sanitizeEditorContent(currentEditor.getHTML(), 'option')
+  if (content !== currentContent) currentEditor.commands.setContent(content, { emitUpdate: false })
 })
 
 const tools = computed(() => editor.value
